@@ -2,17 +2,17 @@
 
 [![](CJsonObject)](https://raw.githubusercontent.com/Bwar/bwar.github.io/master/style/images/logo-CJsonObject.png) <br/>
 
-CJsonObject is a newly developed C++ version based on an older version of cJSON. The biggest advantage of CJsonObject is that it is light, simple and easy to use, and the development efficiency is very high. CJsonObject is much simpler and easier to use than cJSON. It has nothing to do with DaveGamble/cJSON, and the reason for such a fork tell everyone CJsonObject comes from cJSON.
+CJsonObject is a newly developed C++ version based on an older version of cJSON. The biggest advantage of CJsonObject is that it is light, simple and easy to use, and the development efficiency is very high. CJsonObject is much simpler and easier to use than cJSON.
 
 Bwar's first use of cJSON was the development of a mobile push project in 2013. At that time, although cJSON was useful, but it was easy to forget about free the memory allocated by cJSON. In 2014, Bwar use cJSON again when developing another project. In order to improve the ease of use of cJSON and improve the development efficiency, cJSON was encapsulated and 64-bit integers were supported. In the development of CJsonObject, cJSON was modified slightly.
 
-CJsonObject has verified its stability in several successful case for 4 years. At the same time, CJsonObject integrated into [Nebula](https://github.com/Bwar/Nebula) and was widely used.
+CJsonObject has verified its stability in several successful case for 5 years. At the same time, CJsonObject integrated into [Nebula](https://github.com/Bwar/Nebula) and was widely used.
 
 CJsonObject是Bwar基于cJSON全新开发一个C++版的JSON库，CJsonObject的最大优势是轻量、简单好用，开发效率极高，尤其对多层嵌套json的读取和生成、修改极为方便。CJsonObject比cJSON简单易用得多，且只要不是有意不释放内存就不会发生内存泄漏。用CJsonObject的好处在于完全不用专门的文档，头文件即文档，看完Demo立刻就会用，所有函数都十分通俗易懂，最为关键的一点是解析JSON和生成JSON的编码效率非常高。
 
-CJsonObject经过4年的生产环境应用验证其功能稳定性。同时也被我倾力打造的另一个重点开源项目[Nebula](https://github.com/Bwar/Nebula)集成进去，Nebula中大量应用。
+CJsonObject经过5年的生产环境应用验证其功能稳定性。同时也被我倾力打造的另一个重点开源项目[Nebula](https://github.com/Bwar/Nebula)集成进去，Nebula中大量应用。
 
-CJsonObject与fork的DaveGamble/cJSON没有任何关系，之所以建立这样一个fork关系是出于对原作者的尊重。
+CJsonObject与fork的DaveGamble/cJSON没有任何关系，之前建立这样一个fork关系是出于对原作者的尊重，随着使用CJsonObject的开发者越来越多，CJsonObject需要自己的issue和PR，故2019-7-16下午CJsonObject解除了与cJson的fork关系，独立为一个根项目。
 
 Bwar第一次使用cJSON是在2013年开发一个移动推送项目的时候，那时觉得cJSON虽然好用，但很容易忘了释放cJSON分配的内存。2014年Bwar在开发另一个项目时再次使用cJSON，为了提高cJSON的易用性提高开发效率对cJSON进行封装并支持64位整数，从而有了CJsonObject，在开发CJsonObject的同时对cJSON作了少量修改。
 
