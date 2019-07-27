@@ -8,7 +8,7 @@ int main()
     double fTimeout;
     std::string strValue;
     neb::CJsonObject oJson("{\"refresh_interval\":60,"
-                        "\"test_float\":[18.0, 10.0, 5.0],"
+                        "\"test_float\":[18.0, 10.0, -5],"
                         "\"timeout\":12.5,"
                         "\"dynamic_loading\":["
                             "{"
