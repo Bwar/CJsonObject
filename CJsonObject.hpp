@@ -15,10 +15,8 @@
 #include <stddef.h>
 #include <malloc.h>
 #include <errno.h>
-#include <unistd.h>
 #include <limits.h>
 #include <math.h>
-#include <float.h>
 #include <string>
 #include <map>
 #include <list>

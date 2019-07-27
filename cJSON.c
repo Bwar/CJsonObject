@@ -149,7 +149,7 @@ static const char *parse_number(cJSON *item, const char *num)
 
     if (scale == 0 && subscale == 0)
     {
-        item->valuedouble = (double)(item->sign * (uint64)n);
+        item->valuedouble = (double)(item->sign * n);
         item->valueint = (uint64)(item->sign * (uint64)n);
         item->type = cJSON_Int;
     }
