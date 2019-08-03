@@ -177,6 +177,11 @@ bool CJsonObject::GetKey(std::string& strKey)
     }
 }
 
+void CJsonObject::ResetTraversing()
+{
+    m_itKey = m_listKeys.begin();
+}
+
 CJsonObject& CJsonObject::operator[](const std::string& strKey)
 {
     std::map<std::string, CJsonObject*>::iterator iter;
@@ -787,7 +792,7 @@ bool CJsonObject::Get(const std::string& strKey, float& fValue) const
     }
     else if (pJsonStruct->type == cJSON_Int)
     {
-        fValue = (float)(pJsonStruct->valuedouble);
+        fValue = (float)(pJsonStruct->valueint);
         return(true);
     }
     return(false);
@@ -821,7 +826,7 @@ bool CJsonObject::Get(const std::string& strKey, double& dValue) const
     }
     else if (pJsonStruct->type == cJSON_Int)
     {
-        dValue = (double)(pJsonStruct->valuedouble);
+        dValue = (double)(pJsonStruct->valueint);
         return(true);
     }
     return(false);
@@ -2028,7 +2033,7 @@ bool CJsonObject::Get(int iWhich, float& fValue) const
     }
     else if (pJsonStruct->type == cJSON_Int)
     {
-        fValue = (float)(pJsonStruct->valuedouble);
+        fValue = (float)(pJsonStruct->valueint);
         return(true);
     }
     return(false);
@@ -2062,7 +2067,7 @@ bool CJsonObject::Get(int iWhich, double& dValue) const
     }
     else if (pJsonStruct->type == cJSON_Int)
     {
-        dValue = (double)(pJsonStruct->valuedouble);
+        dValue = (double)(pJsonStruct->valueint);
         return(true);
     }
     return(false);

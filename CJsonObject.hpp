@@ -58,6 +58,7 @@ public:     // method of ordinary json object
     bool AddEmptySubObject(const std::string& strKey);
     bool AddEmptySubArray(const std::string& strKey);
     bool GetKey(std::string& strKey);
+    void ResetTraversing();
     CJsonObject& operator[](const std::string& strKey);
     std::string operator()(const std::string& strKey) const;
     bool Get(const std::string& strKey, CJsonObject& oJsonObject) const;
