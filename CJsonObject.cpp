@@ -83,6 +83,11 @@ bool CJsonObject::AddEmptySubObject(const std::string& strKey)
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateObject();
     if (pJsonStruct == NULL)
     {
@@ -119,6 +124,11 @@ bool CJsonObject::AddEmptySubArray(const std::string& strKey)
     if (pFocusData->type != cJSON_Object)
     {
         m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateArray();
@@ -887,6 +897,11 @@ bool CJsonObject::Add(const std::string& strKey, const CJsonObject& oJsonObject)
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str());
     if (pJsonStruct == NULL)
     {
@@ -939,6 +954,11 @@ bool CJsonObject::Add(const std::string& strKey, const std::string& strValue)
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateString(strValue.c_str());
     if (pJsonStruct == NULL)
     {
@@ -978,6 +998,11 @@ bool CJsonObject::Add(const std::string& strKey, int32 iValue)
     if (pFocusData->type != cJSON_Object)
     {
         m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateInt((uint64)iValue, -1);
@@ -1021,6 +1046,11 @@ bool CJsonObject::Add(const std::string& strKey, uint32 uiValue)
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateInt((uint64)uiValue, 1);
     if (pJsonStruct == NULL)
     {
@@ -1060,6 +1090,11 @@ bool CJsonObject::Add(const std::string& strKey, int64 llValue)
     if (pFocusData->type != cJSON_Object)
     {
         m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateInt((uint64)llValue, -1);
@@ -1103,6 +1138,11 @@ bool CJsonObject::Add(const std::string& strKey, uint64 ullValue)
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateInt(ullValue, 1);
     if (pJsonStruct == NULL)
     {
@@ -1142,6 +1182,11 @@ bool CJsonObject::Add(const std::string& strKey, bool bValue, bool bValueAgain)
     if (pFocusData->type != cJSON_Object)
     {
         m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateBool(bValue);
@@ -1185,6 +1230,11 @@ bool CJsonObject::Add(const std::string& strKey, float fValue)
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateDouble((double)fValue, -1);
     if (pJsonStruct == NULL)
     {
@@ -1226,6 +1276,11 @@ bool CJsonObject::Add(const std::string& strKey, double dValue)
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateDouble((double)dValue, -1);
     if (pJsonStruct == NULL)
     {
@@ -1265,6 +1320,11 @@ bool CJsonObject::AddNull(const std::string& strKey)
     if (pFocusData->type != cJSON_Object)
     {
         m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateNull();
@@ -2128,6 +2188,7 @@ bool CJsonObject::Add(const CJsonObject& oJsonObject)
         m_strErrMsg = "not a json array! json object?";
         return(false);
     }
+    }
     cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str());
     if (pJsonStruct == NULL)
     {
@@ -2188,6 +2249,7 @@ bool CJsonObject::Add(const std::string& strValue)
     {
         m_strErrMsg = "not a json array! json object?";
         return(false);
+    }
     }
     cJSON* pJsonStruct = cJSON_CreateString(strValue.c_str());
     if (pJsonStruct == NULL)
