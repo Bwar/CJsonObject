@@ -145,11 +145,10 @@ private:
 private:
     cJSON* m_pJsonData;
     cJSON* m_pExternJsonDataRef;
+    cJSON* m_pKeyTravers;
     std::string m_strErrMsg;
     std::map<unsigned int, CJsonObject*> m_mapJsonArrayRef;
     std::map<std::string, CJsonObject*> m_mapJsonObjectRef;
-    std::list<std::string> m_listKeys;
-    std::list<std::string>::const_iterator m_itKey;
 };
 
 }

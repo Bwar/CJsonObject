@@ -14,19 +14,19 @@ namespace neb
 {
 
 CJsonObject::CJsonObject()
-    : m_pJsonData(NULL), m_pExternJsonDataRef(NULL)
+    : m_pJsonData(NULL), m_pExternJsonDataRef(NULL), m_pKeyTravers(NULL)
 {
     // m_pJsonData = cJSON_CreateObject();  
 }
 
 CJsonObject::CJsonObject(const std::string& strJson)
-    : m_pJsonData(NULL), m_pExternJsonDataRef(NULL)
+    : m_pJsonData(NULL), m_pExternJsonDataRef(NULL), m_pKeyTravers(NULL)
 {
     Parse(strJson);
 }
 
 CJsonObject::CJsonObject(const CJsonObject* pJsonObject)
-    : m_pJsonData(NULL), m_pExternJsonDataRef(NULL)
+    : m_pJsonData(NULL), m_pExternJsonDataRef(NULL), m_pKeyTravers(NULL)
 {
     if (pJsonObject)
     {
@@ -35,7 +35,7 @@ CJsonObject::CJsonObject(const CJsonObject* pJsonObject)
 }
 
 CJsonObject::CJsonObject(const CJsonObject& oJsonObject)
-    : m_pJsonData(NULL), m_pExternJsonDataRef(NULL)
+    : m_pJsonData(NULL), m_pExternJsonDataRef(NULL), m_pKeyTravers(NULL)
 {
     Parse(oJsonObject.ToString());
 }
@@ -70,6 +70,7 @@ bool CJsonObject::AddEmptySubObject(const std::string& strKey)
     else
     {
         m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
         pFocusData = m_pJsonData;
     }
 
@@ -95,7 +96,7 @@ bool CJsonObject::AddEmptySubObject(const std::string& strKey)
         return(false);
     }
     cJSON_AddItemToObject(pFocusData, strKey.c_str(), pJsonStruct);
-    m_listKeys.clear();
+    m_pKeyTravers = pFocusData;
     return(true);
 }
 
@@ -113,6 +114,7 @@ bool CJsonObject::AddEmptySubArray(const std::string& strKey)
     else
     {
         m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
         pFocusData = m_pJsonData;
     }
 
@@ -138,7 +140,7 @@ bool CJsonObject::AddEmptySubArray(const std::string& strKey)
         return(false);
     }
     cJSON_AddItemToObject(pFocusData, strKey.c_str(), pJsonStruct);
-    m_listKeys.clear();
+    m_pKeyTravers = pFocusData;
     return(true);
 }
 
@@ -148,48 +150,50 @@ bool CJsonObject::GetKey(std::string& strKey)
     {
         return(false);
     }
-    if (m_listKeys.size() == 0)
+    if (m_pKeyTravers == NULL)
     {
-        cJSON* pFocusData = NULL;
         if (m_pJsonData != NULL)
         {
-            pFocusData = m_pJsonData;
+            m_pKeyTravers = m_pJsonData;
         }
         else if (m_pExternJsonDataRef != NULL)
         {
-            pFocusData = m_pExternJsonDataRef;
+            m_pKeyTravers = m_pExternJsonDataRef;
+        }
+        return(false);
+    }
+    else if (m_pKeyTravers == m_pJsonData || m_pKeyTravers == m_pExternJsonDataRef)
+    {
+        cJSON *c = m_pKeyTravers->child;
+        if (c)
+        {
+            strKey = c->string;
+            m_pKeyTravers = c->next;
+            return(true);
         }
         else
         {
             return(false);
         }
-
-        cJSON *c = pFocusData->child;
-        while (c)
-        {
-            m_listKeys.push_back(c->string);
-            c = c->next;
-        }
-        m_itKey = m_listKeys.begin();
-    }
-
-    if (m_itKey == m_listKeys.end())
-    {
-        strKey = "";
-        m_itKey = m_listKeys.begin();
-        return(false);
     }
     else
     {
-        strKey = *m_itKey;
-        ++m_itKey;
+        strKey = m_pKeyTravers->string;
+        m_pKeyTravers = m_pKeyTravers->next;
         return(true);
     }
 }
 
 void CJsonObject::ResetTraversing()
 {
-    m_itKey = m_listKeys.begin();
+    if (m_pJsonData != NULL)
+    {
+        m_pKeyTravers = m_pJsonData;
+    }
+    else
+    {
+        m_pKeyTravers = m_pExternJsonDataRef;
+    }
 }
 
 CJsonObject& CJsonObject::operator[](const std::string& strKey)
@@ -426,6 +430,7 @@ bool CJsonObject::Parse(const std::string& strJson)
 {
     Clear();
     m_pJsonData = cJSON_Parse(strJson.c_str());
+    m_pKeyTravers = m_pJsonData;
     if (m_pJsonData == NULL)
     {
         m_strErrMsg = std::string("prase json string error at ") + cJSON_GetErrorPtr();
@@ -437,6 +442,7 @@ bool CJsonObject::Parse(const std::string& strJson)
 void CJsonObject::Clear()
 {
     m_pExternJsonDataRef = NULL;
+    m_pKeyTravers = NULL;
     if (m_pJsonData != NULL)
     {
         cJSON_Delete(m_pJsonData);
@@ -462,7 +468,6 @@ void CJsonObject::Clear()
         }
     }
     m_mapJsonObjectRef.clear();
-    m_listKeys.clear();
 }
 
 bool CJsonObject::IsEmpty() const
@@ -884,6 +889,7 @@ bool CJsonObject::Add(const std::string& strKey, const CJsonObject& oJsonObject)
     else
     {
         m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
         pFocusData = m_pJsonData;
     }
 
@@ -923,7 +929,7 @@ bool CJsonObject::Add(const std::string& strKey, const CJsonObject& oJsonObject)
         }
         m_mapJsonObjectRef.erase(iter);
     }
-    m_listKeys.clear();
+    m_pKeyTravers = pFocusData;
     return(true);
 }
 
@@ -941,6 +947,7 @@ bool CJsonObject::Add(const std::string& strKey, const std::string& strValue)
     else
     {
         m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
         pFocusData = m_pJsonData;
     }
 
@@ -969,7 +976,7 @@ bool CJsonObject::Add(const std::string& strKey, const std::string& strValue)
     {
         return(false);
     }
-    m_listKeys.clear();
+    m_pKeyTravers = pFocusData;
     return(true);
 }
 
@@ -987,6 +994,7 @@ bool CJsonObject::Add(const std::string& strKey, int32 iValue)
     else
     {
         m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
         pFocusData = m_pJsonData;
     }
 
@@ -1015,7 +1023,7 @@ bool CJsonObject::Add(const std::string& strKey, int32 iValue)
     {
         return(false);
     }
-    m_listKeys.clear();
+    m_pKeyTravers = pFocusData;
     return(true);
 }
 
@@ -1033,6 +1041,7 @@ bool CJsonObject::Add(const std::string& strKey, uint32 uiValue)
     else
     {
         m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
         pFocusData = m_pJsonData;
     }
 
@@ -1061,7 +1070,7 @@ bool CJsonObject::Add(const std::string& strKey, uint32 uiValue)
     {
         return(false);
     }
-    m_listKeys.clear();
+    m_pKeyTravers = pFocusData;
     return(true);
 }
 
@@ -1079,6 +1088,7 @@ bool CJsonObject::Add(const std::string& strKey, int64 llValue)
     else
     {
         m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
         pFocusData = m_pJsonData;
     }
 
@@ -1107,7 +1117,7 @@ bool CJsonObject::Add(const std::string& strKey, int64 llValue)
     {
         return(false);
     }
-    m_listKeys.clear();
+    m_pKeyTravers = pFocusData;
     return(true);
 }
 
@@ -1125,6 +1135,7 @@ bool CJsonObject::Add(const std::string& strKey, uint64 ullValue)
     else
     {
         m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
         pFocusData = m_pJsonData;
     }
 
@@ -1153,7 +1164,7 @@ bool CJsonObject::Add(const std::string& strKey, uint64 ullValue)
     {
         return(false);
     }
-    m_listKeys.clear();
+    m_pKeyTravers = pFocusData;
     return(true);
 }
 
@@ -1171,6 +1182,7 @@ bool CJsonObject::Add(const std::string& strKey, bool bValue, bool bValueAgain)
     else
     {
         m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
         pFocusData = m_pJsonData;
     }
 
@@ -1199,7 +1211,7 @@ bool CJsonObject::Add(const std::string& strKey, bool bValue, bool bValueAgain)
     {
         return(false);
     }
-    m_listKeys.clear();
+    m_pKeyTravers = pFocusData;
     return(true);
 }
 
@@ -1217,6 +1229,7 @@ bool CJsonObject::Add(const std::string& strKey, float fValue)
     else
     {
         m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
         pFocusData = m_pJsonData;
     }
 
@@ -1245,7 +1258,7 @@ bool CJsonObject::Add(const std::string& strKey, float fValue)
     {
         return(false);
     }
-    m_listKeys.clear();
+    m_pKeyTravers = pFocusData;
     return(true);
 }
 
@@ -1263,6 +1276,7 @@ bool CJsonObject::Add(const std::string& strKey, double dValue)
     else
     {
         m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
         pFocusData = m_pJsonData;
     }
 
@@ -1291,7 +1305,7 @@ bool CJsonObject::Add(const std::string& strKey, double dValue)
     {
         return(false);
     }
-    m_listKeys.clear();
+    m_pKeyTravers = pFocusData;
     return(true);
 }
 
@@ -1309,6 +1323,7 @@ bool CJsonObject::AddNull(const std::string& strKey)
     else
     {
         m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
         pFocusData = m_pJsonData;
     }
 
@@ -1337,7 +1352,7 @@ bool CJsonObject::AddNull(const std::string& strKey)
     {
         return(false);
     }
-    m_listKeys.clear();
+    m_pKeyTravers = pFocusData;
     return(true);
 }
 
@@ -1373,7 +1388,7 @@ bool CJsonObject::Delete(const std::string& strKey)
         }
         m_mapJsonObjectRef.erase(iter);
     }
-    m_listKeys.clear();
+    m_pKeyTravers = pFocusData;
     return(true);
 }
 
@@ -2188,7 +2203,6 @@ bool CJsonObject::Add(const CJsonObject& oJsonObject)
         m_strErrMsg = "not a json array! json object?";
         return(false);
     }
-    }
     cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str());
     if (pJsonStruct == NULL)
     {
@@ -2249,7 +2263,6 @@ bool CJsonObject::Add(const std::string& strValue)
     {
         m_strErrMsg = "not a json array! json object?";
         return(false);
-    }
     }
     cJSON* pJsonStruct = cJSON_CreateString(strValue.c_str());
     if (pJsonStruct == NULL)
@@ -3517,7 +3530,7 @@ bool CJsonObject::ReplaceWithNull(int iWhich)
 }
 
 CJsonObject::CJsonObject(cJSON* pJsonData)
-    : m_pJsonData(NULL), m_pExternJsonDataRef(pJsonData)
+    : m_pJsonData(NULL), m_pExternJsonDataRef(pJsonData), m_pKeyTravers(pJsonData)
 {
 }
 
