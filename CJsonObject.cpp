@@ -306,7 +306,7 @@ std::string CJsonObject::operator()(const std::string& strKey) const
         char szNumber[128] = {0};
         if (pJsonStruct->sign == -1)
         {
-            if ((int64)pJsonStruct->valueint <= (int64)INT_MAX && (int64)pJsonStruct->valueint >= (int64)INT_MIN)
+            if (pJsonStruct->valueint <= (int64)INT_MAX && (int64)pJsonStruct->valueint >= (int64)INT_MIN)
             {
                 snprintf(szNumber, sizeof(szNumber), "%d", (int32)pJsonStruct->valueint);
             }
@@ -317,7 +317,7 @@ std::string CJsonObject::operator()(const std::string& strKey) const
         }
         else
         {
-            if (pJsonStruct->valueint <= (uint64)UINT_MAX)
+            if ((uint64)pJsonStruct->valueint <= (uint64)UINT_MAX)
             {
                 snprintf(szNumber, sizeof(szNumber), "%u", (uint32)pJsonStruct->valueint);
             }
@@ -381,7 +381,7 @@ std::string CJsonObject::operator()(unsigned int uiWhich) const
         char szNumber[128] = {0};
         if (pJsonStruct->sign == -1)
         {
-            if ((int64)pJsonStruct->valueint <= (int64)INT_MAX && (int64)pJsonStruct->valueint >= (int64)INT_MIN)
+            if (pJsonStruct->valueint <= (int64)INT_MAX && (int64)pJsonStruct->valueint >= (int64)INT_MIN)
             {
                 snprintf(szNumber, sizeof(szNumber), "%d", (int32)pJsonStruct->valueint);
             }
@@ -392,7 +392,7 @@ std::string CJsonObject::operator()(unsigned int uiWhich) const
         }
         else
         {
-            if (pJsonStruct->valueint <= (uint64)UINT_MAX)
+            if ((uint64)pJsonStruct->valueint <= (uint64)UINT_MAX)
             {
                 snprintf(szNumber, sizeof(szNumber), "%u", (uint32)pJsonStruct->valueint);
             }
@@ -800,14 +800,9 @@ bool CJsonObject::Get(const std::string& strKey, float& fValue) const
     {
         return(false);
     }
-    if (pJsonStruct->type == cJSON_Double)
+    if (pJsonStruct->type == cJSON_Double || pJsonStruct->type == cJSON_Int)
     {
         fValue = (float)(pJsonStruct->valuedouble);
-        return(true);
-    }
-    else if (pJsonStruct->type == cJSON_Int)
-    {
-        fValue = (float)(pJsonStruct->valueint);
         return(true);
     }
     return(false);
@@ -834,14 +829,9 @@ bool CJsonObject::Get(const std::string& strKey, double& dValue) const
     {
         return(false);
     }
-    if (pJsonStruct->type == cJSON_Double)
+    if (pJsonStruct->type == cJSON_Double || pJsonStruct->type == cJSON_Int)
     {
         dValue = pJsonStruct->valuedouble;
-        return(true);
-    }
-    else if (pJsonStruct->type == cJSON_Int)
-    {
-        dValue = (double)(pJsonStruct->valueint);
         return(true);
     }
     return(false);
@@ -2101,14 +2091,9 @@ bool CJsonObject::Get(int iWhich, float& fValue) const
     {
         return(false);
     }
-    if (pJsonStruct->type == cJSON_Double)
+    if (pJsonStruct->type == cJSON_Double || pJsonStruct->type == cJSON_Int)
     {
         fValue = (float)(pJsonStruct->valuedouble);
-        return(true);
-    }
-    else if (pJsonStruct->type == cJSON_Int)
-    {
-        fValue = (float)(pJsonStruct->valueint);
         return(true);
     }
     return(false);
@@ -2135,14 +2120,9 @@ bool CJsonObject::Get(int iWhich, double& dValue) const
     {
         return(false);
     }
-    if (pJsonStruct->type == cJSON_Double)
+    if (pJsonStruct->type == cJSON_Double || pJsonStruct->type == cJSON_Int)
     {
         dValue = pJsonStruct->valuedouble;
-        return(true);
-    }
-    else if (pJsonStruct->type == cJSON_Int)
-    {
-        dValue = (double)(pJsonStruct->valueint);
         return(true);
     }
     return(false);

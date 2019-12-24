@@ -55,7 +55,7 @@ typedef struct cJSON
     int type; /* The type of the item, as above. */
 
     char *valuestring; /* The item's string, if type==cJSON_String */
-    uint64 valueint; /* The item's number, if type==cJSON_Number */
+    int64 valueint; /* The item's number, if type==cJSON_Number */
     double valuedouble; /* The item's number, if type==cJSON_Number */
     int sign;   /* sign of valueint, 1(unsigned), -1(signed) */
 

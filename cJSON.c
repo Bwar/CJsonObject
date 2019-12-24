@@ -150,14 +150,14 @@ static const char *parse_number(cJSON *item, const char *num)
     if (scale == 0 && subscale == 0)
     {
         item->valuedouble = (double)(item->sign * n);
-        item->valueint = (uint64)(item->sign * (uint64)n);
+        item->valueint = item->sign * (int64)n;
         item->type = cJSON_Int;
     }
     else
     {
         n = item->sign * n * pow(10.0, (scale + subscale * signsubscale)); /* number = +/- number.fraction * 10^+/- exponent */
         item->valuedouble = (double)n;
-        item->valueint = (uint64)n;
+        item->valueint = (int64)n;
         item->type = cJSON_Double;
     }
     return num;
@@ -985,7 +985,7 @@ cJSON *cJSON_CreateDouble(double num, int sign)
     {
         item->type = cJSON_Double;
         item->valuedouble = num;
-        item->valueint = (uint64)num;
+        item->valueint = (int64)num;
         item->sign = sign;
     }
     return item;
@@ -997,7 +997,7 @@ cJSON *cJSON_CreateInt(uint64 num, int sign)
     {
         item->type = cJSON_Int;
         item->valuedouble = (double)num;
-        item->valueint = (uint64)num;
+        item->valueint = (int64)num;
         item->sign = sign;
     }
     return item;
