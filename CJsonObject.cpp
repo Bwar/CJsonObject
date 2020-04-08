@@ -10,6 +10,10 @@
 
 #include "CJsonObject.hpp"
 
+#ifdef _WIN32
+#define snprintf _snprintf_s
+#endif
+
 namespace neb
 {
 
