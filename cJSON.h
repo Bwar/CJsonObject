@@ -31,6 +31,9 @@ typedef unsigned int uint32;
     #if __WORDSIZE == 64
         typedef long int64;
 		typedef unsigned long uint64;
+    #else
+        typedef int_fast64_t int64;
+        typedef uint_fast64_t uint64;
     #endif
 #else
     typedef long long int64;
