@@ -343,6 +343,7 @@ std::string CJsonObject::operator()(const std::string& strKey) const
         {
             snprintf(szNumber, sizeof(szNumber), "%f", pJsonStruct->valuedouble);
         }
+        return(std::string(szNumber));
     }
     else if (pJsonStruct->type == cJSON_False)
     {
@@ -418,6 +419,7 @@ std::string CJsonObject::operator()(unsigned int uiWhich) const
         {
             snprintf(szNumber, sizeof(szNumber), "%f", pJsonStruct->valuedouble);
         }
+        return(std::string(szNumber));
     }
     else if (pJsonStruct->type == cJSON_False)
     {
