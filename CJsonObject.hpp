@@ -92,6 +92,12 @@ public:     // method of ordinary json object
     bool Replace(const std::string& strKey, float fValue);
     bool Replace(const std::string& strKey, double dValue);
     bool ReplaceWithNull(const std::string& strKey);    // replace value with null
+    template <typename T> bool ReplaceAdd(const std::string& strKey,T& value) 
+    {
+      if(Replace(strKey,value) == false)
+        return Add(strKey,value);
+      return true;
+    }
 
 public:     // method of json array
     int GetArraySize();
