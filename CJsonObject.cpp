@@ -9,6 +9,7 @@
  ******************************************************************************/
 
 #include "CJsonObject.hpp"
+#include <sstream>
 
 #ifdef _WIN32
 #define snprintf _snprintf_s
@@ -307,30 +308,9 @@ std::string CJsonObject::operator()(const std::string& strKey) const
     }
     else if (pJsonStruct->type == cJSON_Int)
     {
-        char szNumber[128] = {0};
-        if (pJsonStruct->sign == -1)
-        {
-            if (pJsonStruct->valueint <= (int64)INT_MAX && (int64)pJsonStruct->valueint >= (int64)INT_MIN)
-            {
-                snprintf(szNumber, sizeof(szNumber), "%d", (int32)pJsonStruct->valueint);
-            }
-            else
-            {
-                snprintf(szNumber, sizeof(szNumber), "%lld", (int64)pJsonStruct->valueint);
-            }
-        }
-        else
-        {
-            if ((uint64)pJsonStruct->valueint <= (uint64)UINT_MAX)
-            {
-                snprintf(szNumber, sizeof(szNumber), "%u", (uint32)pJsonStruct->valueint);
-            }
-            else
-            {
-                snprintf(szNumber, sizeof(szNumber), "%llu", pJsonStruct->valueint);
-            }
-        }
-        return(std::string(szNumber));
+        std::ostringstream ossNumber;
+        ossNumber << pJsonStruct->valueint;
+        return(ossNumber.str());
     }
     else if (pJsonStruct->type == cJSON_Double)
     {
@@ -383,30 +363,9 @@ std::string CJsonObject::operator()(unsigned int uiWhich) const
     }
     else if (pJsonStruct->type == cJSON_Int)
     {
-        char szNumber[128] = {0};
-        if (pJsonStruct->sign == -1)
-        {
-            if (pJsonStruct->valueint <= (int64)INT_MAX && (int64)pJsonStruct->valueint >= (int64)INT_MIN)
-            {
-                snprintf(szNumber, sizeof(szNumber), "%d", (int32)pJsonStruct->valueint);
-            }
-            else
-            {
-                snprintf(szNumber, sizeof(szNumber), "%lld", (int64)pJsonStruct->valueint);
-            }
-        }
-        else
-        {
-            if ((uint64)pJsonStruct->valueint <= (uint64)UINT_MAX)
-            {
-                snprintf(szNumber, sizeof(szNumber), "%u", (uint32)pJsonStruct->valueint);
-            }
-            else
-            {
-                snprintf(szNumber, sizeof(szNumber), "%llu", pJsonStruct->valueint);
-            }
-        }
-        return(std::string(szNumber));
+        std::ostringstream ossNumber;
+        ossNumber << pJsonStruct->valueint;
+        return(ossNumber.str());
     }
     else if (pJsonStruct->type == cJSON_Double)
     {

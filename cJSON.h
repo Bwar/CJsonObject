@@ -25,17 +25,10 @@
 
 #include <stdint.h>
 
-typedef int int32;
-typedef unsigned int uint32;
-#ifndef _WIN32
-    #if __WORDSIZE == 64
-        typedef long int64;
-		typedef unsigned long uint64;
-    #endif
-#else
-    typedef long long int64;
-	typedef unsigned long long uint64;
-#endif
+typedef int32_t int32;
+typedef uint32_t uint32;
+typedef int64_t int64;
+typedef uint64_t uint64;
 
 
 #ifdef __cplusplus
