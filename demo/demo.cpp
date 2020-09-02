@@ -1,14 +1,34 @@
 #include <string>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include "../CJsonObject.hpp"
 
-int main()
+//int main()
+int main(int argc, char* argv[])
 {
+    std::ifstream fin(argv[1]);
+    if (fin.good())
+    {
+        neb::CJsonObject oJson;
+        std::stringstream ssContent;
+        ssContent << fin.rdbuf();
+        if (oJson.Parse(ssContent.str()))
+        {
+            std::cout << oJson.ToString() << std::endl;
+        }
+        else
+        {
+            std::cerr << "parse json error" << "\n";// << ssContent.str() << std::endl;
+        }
+        fin.close();
+    }
     int iValue;
     double fTimeout;
     std::string strValue;
     neb::CJsonObject oJson("{\"refresh_interval\":60,"
                         "\"test_float\":[18.0, 10.0, 5.0],"
+                        "\"test_int\":[135355, -1844674407370955161, -935375],"
                         "\"timeout\":12.5,"
                         "\"dynamic_loading\":["
                             "{"
@@ -83,7 +103,11 @@ int main()
      for (int i = 0; i < oJson["test_float"].GetArraySize(); ++i)
      {
          oJson["test_float"].Get(i, fTestValue);
-         std::cout << fTestValue << std::endl;
+         std::cout << fTestValue << "\t in string: " << oJson["test_float"](i) << std::endl;
+     }
+     for (int i = 0; i < oJson["test_int"].GetArraySize(); ++i)
+     {
+         std::cout << "in string: " << oJson["test_int"](i) << std::endl;
      }
      oJson.AddNull("null_value");
      std::cout << oJson.IsNull("test_float") << "\t" << oJson.IsNull("null_value") << std::endl;

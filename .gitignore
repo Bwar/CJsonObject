@@ -6,3 +6,7 @@
 .project
 *.swp
 *.exe
+*.txt
+*.log
+*.json
+CJsonObjectTest
