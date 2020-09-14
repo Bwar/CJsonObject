@@ -1305,6 +1305,20 @@ bool CJsonObject::Add(const std::string& strKey, double dValue)
     return(true);
 }
 
+bool CJsonObject::ReplaceAdd(const std::string& strKey,const CJsonObject& oJsonObject)
+{
+  if(Replace(strKey,oJsonObject) == false)
+    return Add(strKey,oJsonObject);
+  return true;
+}
+
+bool CJsonObject::ReplaceAdd(const std::string& strKey,const std::string& strValue)
+{
+  if(Replace(strKey,strValue) == false)
+    return Add(strKey,strValue);
+  return true;
+}
+
 bool CJsonObject::AddNull(const std::string& strKey)
 {
     cJSON* pFocusData = NULL;
