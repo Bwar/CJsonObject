@@ -61,6 +61,7 @@ public:     // method of ordinary json object
     void ResetTraversing();
     CJsonObject& operator[](const std::string& strKey);
     std::string operator()(const std::string& strKey) const;
+    bool KeyExist(const std::string& strKey) const;
     bool Get(const std::string& strKey, CJsonObject& oJsonObject) const;
     bool Get(const std::string& strKey, std::string& strValue) const;
     bool Get(const std::string& strKey, int32& iValue) const;

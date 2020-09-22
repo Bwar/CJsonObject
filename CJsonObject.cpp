@@ -556,6 +556,29 @@ std::string CJsonObject::ToFormattedString() const
     return(strJsonData);
 }
 
+bool CJsonObject::KeyExist(const std::string& strKey) const
+{
+    cJSON* pJsonStruct = NULL;
+    if (m_pJsonData != NULL)
+    {
+        if (m_pJsonData->type == cJSON_Object)
+        {
+            pJsonStruct = cJSON_GetObjectItem(m_pJsonData, strKey.c_str());
+        }
+    }
+    else if (m_pExternJsonDataRef != NULL)
+    {
+        if(m_pExternJsonDataRef->type == cJSON_Object)
+        {
+            pJsonStruct = cJSON_GetObjectItem(m_pExternJsonDataRef, strKey.c_str());
+        }
+    }
+    if (pJsonStruct == NULL)
+    {
+        return(false);
+    }
+    return(true);
+}
 
 bool CJsonObject::Get(const std::string& strKey, CJsonObject& oJsonObject) const
 {
