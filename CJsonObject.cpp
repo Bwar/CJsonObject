@@ -21,11 +21,15 @@ CJsonObject::CJsonObject()
     : m_pJsonData(NULL), m_pExternJsonDataRef(NULL), m_pKeyTravers(NULL)
 {
     // m_pJsonData = cJSON_CreateObject();  
+    m_array_iter = m_mapJsonArrayRef.end();
+    m_object_iter = m_mapJsonObjectRef.end();
 }
 
 CJsonObject::CJsonObject(const std::string& strJson)
     : m_pJsonData(NULL), m_pExternJsonDataRef(NULL), m_pKeyTravers(NULL)
 {
+    m_array_iter = m_mapJsonArrayRef.end();
+    m_object_iter = m_mapJsonObjectRef.end();
     Parse(strJson);
 }
 
@@ -34,6 +38,8 @@ CJsonObject::CJsonObject(const CJsonObject* pJsonObject)
 {
     if (pJsonObject)
     {
+        m_array_iter = m_mapJsonArrayRef.end();
+        m_object_iter = m_mapJsonObjectRef.end();
         Parse(pJsonObject->ToString());
     }
 }
@@ -41,8 +47,29 @@ CJsonObject::CJsonObject(const CJsonObject* pJsonObject)
 CJsonObject::CJsonObject(const CJsonObject& oJsonObject)
     : m_pJsonData(NULL), m_pExternJsonDataRef(NULL), m_pKeyTravers(NULL)
 {
+    m_array_iter = m_mapJsonArrayRef.end();
+    m_object_iter = m_mapJsonObjectRef.end();
     Parse(oJsonObject.ToString());
 }
+
+#if __cplusplus >= 201101L
+CJsonObject::CJsonObject(CJsonObject&& oJsonObject)
+    : m_pJsonData(oJsonObject.m_pJsonData),
+      m_pExternJsonDataRef(oJsonObject.m_pExternJsonDataRef),
+      m_pKeyTravers(oJsonObject.m_pKeyTravers),
+      mc_pError(oJsonObject.mc_pError)
+{
+    oJsonObject.m_pJsonData = NULL;
+    oJsonObject.m_pExternJsonDataRef = NULL;
+    oJsonObject.m_pKeyTravers = NULL;
+    oJsonObject.mc_pError = NULL;
+    m_strErrMsg = std::move(oJsonObject.m_strErrMsg);
+    m_mapJsonArrayRef = std::move(oJsonObject.m_mapJsonArrayRef);
+    m_mapJsonObjectRef = std::move(oJsonObject.m_mapJsonObjectRef);
+    m_array_iter = m_mapJsonArrayRef.end();
+    m_object_iter = m_mapJsonObjectRef.end();
+}
+#endif
 
 CJsonObject::~CJsonObject()
 {
@@ -54,6 +81,26 @@ CJsonObject& CJsonObject::operator=(const CJsonObject& oJsonObject)
     Parse(oJsonObject.ToString().c_str());
     return(*this);
 }
+
+#if __cplusplus >= 201101L
+CJsonObject& CJsonObject::operator=(CJsonObject&& oJsonObject)
+{
+    m_pJsonData = oJsonObject.m_pJsonData;
+    oJsonObject.m_pJsonData = NULL;
+    m_pExternJsonDataRef = oJsonObject.m_pExternJsonDataRef;
+    oJsonObject.m_pExternJsonDataRef = NULL;
+    m_pKeyTravers = oJsonObject.m_pKeyTravers;
+    oJsonObject.m_pKeyTravers = NULL;
+    mc_pError = oJsonObject.mc_pError;
+    oJsonObject.mc_pError = NULL;
+    m_strErrMsg = std::move(oJsonObject.m_strErrMsg);
+    m_mapJsonArrayRef = std::move(oJsonObject.m_mapJsonArrayRef);
+    m_mapJsonObjectRef = std::move(oJsonObject.m_mapJsonObjectRef);
+    m_array_iter = m_mapJsonArrayRef.end();
+    m_object_iter = m_mapJsonObjectRef.end();
+    return(*this);
+}
+#endif
 
 bool CJsonObject::operator==(const CJsonObject& oJsonObject) const
 {
@@ -202,8 +249,15 @@ void CJsonObject::ResetTraversing()
 
 CJsonObject& CJsonObject::operator[](const std::string& strKey)
 {
-    std::map<std::string, CJsonObject*>::iterator iter;
-    iter = m_mapJsonObjectRef.find(strKey);
+    if (strKey == m_strLastObjectKey && m_object_iter != m_mapJsonObjectRef.end())
+    {
+        return(*(m_object_iter->second));
+    }
+#if __cplusplus < 201101L
+    std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
+#else
+    auto iter = m_mapJsonObjectRef.find(strKey);
+#endif
     if (iter == m_mapJsonObjectRef.end())
     {
         cJSON* pJsonStruct = NULL;
@@ -242,8 +296,15 @@ CJsonObject& CJsonObject::operator[](const std::string& strKey)
 
 CJsonObject& CJsonObject::operator[](unsigned int uiWhich)
 {
-    std::map<unsigned int, CJsonObject*>::iterator iter;
-    iter = m_mapJsonArrayRef.find(uiWhich);
+    if (uiWhich == m_uiLastArrayIndex && m_array_iter != m_mapJsonArrayRef.end())
+    {
+        return(*(m_array_iter->second));
+    }
+#if __cplusplus < 201101L
+    std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.find(uiWhich);
+#else
+    auto iter = m_mapJsonArrayRef.find(uiWhich);
+#endif
     if (iter == m_mapJsonArrayRef.end())
     {
         cJSON* pJsonStruct = NULL;
@@ -316,7 +377,11 @@ std::string CJsonObject::operator()(const std::string& strKey) const
             }
             else
             {
+#if LLONG_MAX==LLONG_MAX
                 snprintf(szNumber, sizeof(szNumber), "%ld", (int64)pJsonStruct->valueint);
+#else
+                snprintf(szNumber, sizeof(szNumber), "%lld", (int64)pJsonStruct->valueint);
+#endif
             }
         }
         else
@@ -327,7 +392,11 @@ std::string CJsonObject::operator()(const std::string& strKey) const
             }
             else
             {
+#if LLONG_MAX==LLONG_MAX
                 snprintf(szNumber, sizeof(szNumber), "%lu", pJsonStruct->valueint);
+#else
+                snprintf(szNumber, sizeof(szNumber), "%llu", pJsonStruct->valueint);
+#endif
             }
         }
         return(std::string(szNumber));
@@ -392,7 +461,11 @@ std::string CJsonObject::operator()(unsigned int uiWhich) const
             }
             else
             {
+#if LLONG_MAX==LLONG_MAX
                 snprintf(szNumber, sizeof(szNumber), "%ld", (int64)pJsonStruct->valueint);
+#else
+                snprintf(szNumber, sizeof(szNumber), "%lld", (int64)pJsonStruct->valueint);
+#endif
             }
         }
         else
@@ -403,7 +476,11 @@ std::string CJsonObject::operator()(unsigned int uiWhich) const
             }
             else
             {
+#if LLONG_MAX==LLONG_MAX
                 snprintf(szNumber, sizeof(szNumber), "%lu", pJsonStruct->valueint);
+#else
+                snprintf(szNumber, sizeof(szNumber), "%llu", pJsonStruct->valueint);
+#endif
             }
         }
         return(std::string(szNumber));
@@ -435,11 +512,11 @@ std::string CJsonObject::operator()(unsigned int uiWhich) const
 bool CJsonObject::Parse(const std::string& strJson)
 {
     Clear();
-    m_pJsonData = cJSON_Parse(strJson.c_str());
+    m_pJsonData = cJSON_Parse(strJson.c_str(), &mc_pError);
     m_pKeyTravers = m_pJsonData;
     if (m_pJsonData == NULL)
     {
-        m_strErrMsg = std::string("prase json string error at ") + cJSON_GetErrorPtr();
+        m_strErrMsg = std::string("prase json string error at ") + mc_pError;
         return(false);
     }
     return(true);
@@ -454,8 +531,12 @@ void CJsonObject::Clear()
         cJSON_Delete(m_pJsonData);
         m_pJsonData = NULL;
     }
+#if __cplusplus < 201101L
     for (std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.begin();
                     iter != m_mapJsonArrayRef.end(); ++iter)
+#else
+    for (auto iter = m_mapJsonArrayRef.begin(); iter != m_mapJsonArrayRef.end(); ++iter)
+#endif
     {
         if (iter->second != NULL)
         {
@@ -464,8 +545,13 @@ void CJsonObject::Clear()
         }
     }
     m_mapJsonArrayRef.clear();
+    m_array_iter = m_mapJsonArrayRef.end();
+#if __cplusplus < 201101L
     for (std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.begin();
                     iter != m_mapJsonObjectRef.end(); ++iter)
+#else
+    for (auto iter = m_mapJsonObjectRef.begin(); iter != m_mapJsonObjectRef.end(); ++iter)
+#endif
     {
         if (iter->second != NULL)
         {
@@ -474,6 +560,7 @@ void CJsonObject::Clear()
         }
     }
     m_mapJsonObjectRef.clear();
+    m_object_iter = m_mapJsonObjectRef.end();
 }
 
 bool CJsonObject::IsEmpty() const
@@ -927,10 +1014,76 @@ bool CJsonObject::Add(const std::string& strKey, const CJsonObject& oJsonObject)
         m_strErrMsg = "key exists!";
         return(false);
     }
-    cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str());
+    cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str(), &mc_pError) ;
     if (pJsonStruct == NULL)
     {
-        m_strErrMsg = std::string("prase json string error at ") + cJSON_GetErrorPtr();
+        m_strErrMsg = std::string("prase json string error at ") + mc_pError;
+        return(false);
+    }
+    cJSON_AddItemToObject(pFocusData, strKey.c_str(), pJsonStruct);
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        return(false);
+    }
+#if __cplusplus < 201101L
+    std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
+#else
+    auto iter = m_mapJsonObjectRef.find(strKey);
+#endif
+    if (iter != m_mapJsonObjectRef.end())
+    {
+        if (iter->second != NULL)
+        {
+            delete (iter->second);
+            iter->second = NULL;
+        }
+        m_mapJsonObjectRef.erase(iter);
+    }
+    m_pKeyTravers = pFocusData;
+    m_strLastObjectKey = "";
+    m_object_iter = m_mapJsonObjectRef.end();
+    return(true);
+}
+
+#if __cplusplus < 201101L
+bool CJsonObject::AddWithMove(const std::string& strKey, CJsonObject& oJsonObject)
+{
+    cJSON* pFocusData = NULL;
+    if (m_pJsonData != NULL)
+    {
+        pFocusData = m_pJsonData;
+    }
+    else if (m_pExternJsonDataRef != NULL)
+    {
+        pFocusData = m_pExternJsonDataRef;
+    }
+    else
+    {
+        m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
+        pFocusData = m_pJsonData;
+    }
+
+    if (pFocusData == NULL)
+    {
+        m_strErrMsg = "json data is null!";
+        return(false);
+    }
+    if (pFocusData->type != cJSON_Object)
+    {
+        m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
+        return(false);
+    }
+    cJSON* pJsonStruct = oJsonObject.m_pJsonData;
+    oJsonObject.m_pJsonData = NULL;
+    if (pJsonStruct == NULL)
+    {
+        m_strErrMsg = "can not move a non-independent(internal) CJsonObject from one to another.";
         return(false);
     }
     cJSON_AddItemToObject(pFocusData, strKey.c_str(), pJsonStruct);
@@ -949,8 +1102,72 @@ bool CJsonObject::Add(const std::string& strKey, const CJsonObject& oJsonObject)
         m_mapJsonObjectRef.erase(iter);
     }
     m_pKeyTravers = pFocusData;
+    m_strLastObjectKey = "";
+    m_object_iter = m_mapJsonObjectRef.end();
     return(true);
 }
+#else
+bool CJsonObject::Add(const std::string& strKey, CJsonObject&& oJsonObject)
+{
+    cJSON* pFocusData = NULL;
+    if (m_pJsonData != NULL)
+    {
+        pFocusData = m_pJsonData;
+    }
+    else if (m_pExternJsonDataRef != NULL)
+    {
+        pFocusData = m_pExternJsonDataRef;
+    }
+    else
+    {
+        m_pJsonData = cJSON_CreateObject();
+        m_pKeyTravers = m_pJsonData;
+        pFocusData = m_pJsonData;
+    }
+
+    if (pFocusData == NULL)
+    {
+        m_strErrMsg = "json data is null!";
+        return(false);
+    }
+    if (pFocusData->type != cJSON_Object)
+    {
+        m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) != NULL)
+    {
+        m_strErrMsg = "key exists!";
+        return(false);
+    }
+    cJSON* pJsonStruct = oJsonObject.m_pJsonData;
+    oJsonObject.m_pJsonData = NULL;
+    if (pJsonStruct == NULL)
+    {
+        m_strErrMsg = "can not move a non-independent(internal) CJsonObject from one to another.";
+        return(false);
+    }
+    cJSON_AddItemToObject(pFocusData, strKey.c_str(), pJsonStruct);
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        return(false);
+    }
+    auto iter = m_mapJsonObjectRef.find(strKey);
+    if (iter != m_mapJsonObjectRef.end())
+    {
+        if (iter->second != NULL)
+        {
+            delete (iter->second);
+            iter->second = NULL;
+        }
+        m_mapJsonObjectRef.erase(iter);
+    }
+    m_pKeyTravers = pFocusData;
+    m_strLastObjectKey = "";
+    m_object_iter = m_mapJsonObjectRef.end();
+    return(true);
+}
+#endif
 
 bool CJsonObject::Add(const std::string& strKey, const std::string& strValue)
 {
@@ -1328,19 +1545,25 @@ bool CJsonObject::Add(const std::string& strKey, double dValue)
     return(true);
 }
 
-bool CJsonObject::ReplaceAdd(const std::string& strKey,const CJsonObject& oJsonObject)
+#if __cplusplus < 201101L
+bool CJsonObject::ReplaceAdd(const std::string& strKey, const CJsonObject& oJsonObject)
 {
-  if(Replace(strKey,oJsonObject) == false)
-    return Add(strKey,oJsonObject);
-  return true;
+    if (KeyExist(strKey))
+    {
+        return(Replace(strKey, oJsonObject));
+    }
+    return(Add(strKey, oJsonObject));
 }
 
-bool CJsonObject::ReplaceAdd(const std::string& strKey,const std::string& strValue)
+bool CJsonObject::ReplaceAdd(const std::string& strKey, const std::string& strValue)
 {
-  if(Replace(strKey,strValue) == false)
-    return Add(strKey,strValue);
-  return true;
+    if (KeyExist(strKey))
+    {
+        return(Replace(strKey, strValue));
+    }
+    return(Add(strKey, strValue));
 }
+#endif
 
 bool CJsonObject::AddNull(const std::string& strKey)
 {
@@ -1411,7 +1634,11 @@ bool CJsonObject::Delete(const std::string& strKey)
         return(false);
     }
     cJSON_DeleteItemFromObject(pFocusData, strKey.c_str());
+#if __cplusplus < 201101L
     std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
+#else
+    auto iter = m_mapJsonObjectRef.find(strKey);
+#endif
     if (iter != m_mapJsonObjectRef.end())
     {
         if (iter->second != NULL)
@@ -1446,10 +1673,63 @@ bool CJsonObject::Replace(const std::string& strKey, const CJsonObject& oJsonObj
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
-    cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str());
+    cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str(), &mc_pError);
     if (pJsonStruct == NULL)
     {
-        m_strErrMsg = std::string("prase json string error at ") + cJSON_GetErrorPtr();
+        m_strErrMsg = std::string("prase json string error at ") + mc_pError;
+        return(false);
+    }
+    cJSON_ReplaceItemInObject(pFocusData, strKey.c_str(), pJsonStruct);
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        return(false);
+    }
+#if __cplusplus < 201101L
+    std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
+#else
+    auto iter = m_mapJsonObjectRef.find(strKey);
+#endif
+    if (iter != m_mapJsonObjectRef.end())
+    {
+        if (iter->second != NULL)
+        {
+            delete (iter->second);
+            iter->second = NULL;
+        }
+        m_mapJsonObjectRef.erase(iter);
+    }
+    m_strLastObjectKey = "";
+    m_object_iter = m_mapJsonObjectRef.end();
+    return(true);
+}
+
+#if __cplusplus < 201101L
+bool CJsonObject::ReplaceWithMove(const std::string& strKey, CJsonObject& oJsonObject)
+{
+    cJSON* pFocusData = NULL;
+    if (m_pJsonData == NULL)
+    {
+        pFocusData = m_pExternJsonDataRef;
+    }
+    else
+    {
+        pFocusData = m_pJsonData;
+    }
+    if (pFocusData == NULL)
+    {
+        m_strErrMsg = "json data is null!";
+        return(false);
+    }
+    if (pFocusData->type != cJSON_Object)
+    {
+        m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    cJSON* pJsonStruct = oJsonObject.m_pJsonData;
+    oJsonObject.m_pJsonData = NULL;
+    if (pJsonStruct == NULL)
+    {
+        m_strErrMsg = "can not move a non-independent(internal) CJsonObject from one to another.";
         return(false);
     }
     cJSON_ReplaceItemInObject(pFocusData, strKey.c_str(), pJsonStruct);
@@ -1467,8 +1747,59 @@ bool CJsonObject::Replace(const std::string& strKey, const CJsonObject& oJsonObj
         }
         m_mapJsonObjectRef.erase(iter);
     }
+    m_strLastObjectKey = "";
+    m_object_iter = m_mapJsonObjectRef.end();
     return(true);
 }
+#else
+bool CJsonObject::Replace(const std::string& strKey, CJsonObject&& oJsonObject)
+{
+    cJSON* pFocusData = NULL;
+    if (m_pJsonData == NULL)
+    {
+        pFocusData = m_pExternJsonDataRef;
+    }
+    else
+    {
+        pFocusData = m_pJsonData;
+    }
+    if (pFocusData == NULL)
+    {
+        m_strErrMsg = "json data is null!";
+        return(false);
+    }
+    if (pFocusData->type != cJSON_Object)
+    {
+        m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    cJSON* pJsonStruct = oJsonObject.m_pJsonData;
+    oJsonObject.m_pJsonData = NULL;
+    if (pJsonStruct == NULL)
+    {
+        m_strErrMsg = "can not move a non-independent(internal) CJsonObject from one to another.";
+        return(false);
+    }
+    cJSON_ReplaceItemInObject(pFocusData, strKey.c_str(), pJsonStruct);
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        return(false);
+    }
+    auto iter = m_mapJsonObjectRef.find(strKey);
+    if (iter != m_mapJsonObjectRef.end())
+    {
+        if (iter->second != NULL)
+        {
+            delete (iter->second);
+            iter->second = NULL;
+        }
+        m_mapJsonObjectRef.erase(iter);
+    }
+    m_strLastObjectKey = "";
+    m_object_iter = m_mapJsonObjectRef.end();
+    return(true);
+}
+#endif
 
 bool CJsonObject::Replace(const std::string& strKey, const std::string& strValue)
 {
@@ -1496,7 +1827,11 @@ bool CJsonObject::Replace(const std::string& strKey, const std::string& strValue
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
+#else
+    auto iter = m_mapJsonObjectRef.find(strKey);
+#endif
     if (iter != m_mapJsonObjectRef.end())
     {
         if (iter->second != NULL)
@@ -1540,7 +1875,11 @@ bool CJsonObject::Replace(const std::string& strKey, int32 iValue)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
+#else
+    auto iter = m_mapJsonObjectRef.find(strKey);
+#endif
     if (iter != m_mapJsonObjectRef.end())
     {
         if (iter->second != NULL)
@@ -1584,7 +1923,11 @@ bool CJsonObject::Replace(const std::string& strKey, uint32 uiValue)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
+#else
+    auto iter = m_mapJsonObjectRef.find(strKey);
+#endif
     if (iter != m_mapJsonObjectRef.end())
     {
         if (iter->second != NULL)
@@ -1628,7 +1971,11 @@ bool CJsonObject::Replace(const std::string& strKey, int64 llValue)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
+#else
+    auto iter = m_mapJsonObjectRef.find(strKey);
+#endif
     if (iter != m_mapJsonObjectRef.end())
     {
         if (iter->second != NULL)
@@ -1672,7 +2019,11 @@ bool CJsonObject::Replace(const std::string& strKey, uint64 ullValue)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
+#else
+    auto iter = m_mapJsonObjectRef.find(strKey);
+#endif
     if (iter != m_mapJsonObjectRef.end())
     {
         if (iter->second != NULL)
@@ -1716,7 +2067,11 @@ bool CJsonObject::Replace(const std::string& strKey, bool bValue, bool bValueAga
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
+#else
+    auto iter = m_mapJsonObjectRef.find(strKey);
+#endif
     if (iter != m_mapJsonObjectRef.end())
     {
         if (iter->second != NULL)
@@ -1760,7 +2115,11 @@ bool CJsonObject::Replace(const std::string& strKey, float fValue)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
+#else
+    auto iter = m_mapJsonObjectRef.find(strKey);
+#endif
     if (iter != m_mapJsonObjectRef.end())
     {
         if (iter->second != NULL)
@@ -1804,7 +2163,11 @@ bool CJsonObject::Replace(const std::string& strKey, double dValue)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
+#else
+    auto iter = m_mapJsonObjectRef.find(strKey);
+#endif
     if (iter != m_mapJsonObjectRef.end())
     {
         if (iter->second != NULL)
@@ -1848,7 +2211,11 @@ bool CJsonObject::ReplaceWithNull(const std::string& strKey)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
+#else
+    auto iter = m_mapJsonObjectRef.find(strKey);
+#endif
     if (iter != m_mapJsonObjectRef.end())
     {
         if (iter->second != NULL)
@@ -2226,10 +2593,10 @@ bool CJsonObject::Add(const CJsonObject& oJsonObject)
         m_strErrMsg = "not a json array! json object?";
         return(false);
     }
-    cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str());
+    cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str(), &mc_pError);
     if (pJsonStruct == NULL)
     {
-        m_strErrMsg = std::string("prase json string error at ") + cJSON_GetErrorPtr();
+        m_strErrMsg = std::string("prase json string error at ") + mc_pError;
         return(false);
     }
     int iArraySizeBeforeAdd = cJSON_GetArraySize(pFocusData);
@@ -2240,8 +2607,12 @@ bool CJsonObject::Add(const CJsonObject& oJsonObject)
         return(false);
     }
     unsigned int uiLastIndex = (unsigned int)cJSON_GetArraySize(pFocusData) - 1;
+#if __cplusplus < 201101L
     for (std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.begin();
                     iter != m_mapJsonArrayRef.end(); )
+#else
+    for (auto iter = m_mapJsonArrayRef.begin(); iter != m_mapJsonArrayRef.end(); )
+#endif
     {
         if (iter->first >= uiLastIndex)
         {
@@ -2257,8 +2628,138 @@ bool CJsonObject::Add(const CJsonObject& oJsonObject)
             iter++;
         }
     }
+    m_uiLastArrayIndex = 0;
+    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
+
+#if __cplusplus < 201101L
+bool CJsonObject::AddWithMove(CJsonObject& oJsonObject)
+{
+    cJSON* pFocusData = NULL;
+    if (m_pJsonData != NULL)
+    {
+        pFocusData = m_pJsonData;
+    }
+    else if (m_pExternJsonDataRef != NULL)
+    {
+        pFocusData = m_pExternJsonDataRef;
+    }
+    else
+    {
+        m_pJsonData = cJSON_CreateArray();
+        pFocusData = m_pJsonData;
+    }
+
+    if (pFocusData == NULL)
+    {
+        m_strErrMsg = "json data is null!";
+        return(false);
+    }
+    if (pFocusData->type != cJSON_Array)
+    {
+        m_strErrMsg = "not a json array! json object?";
+        return(false);
+    }
+    cJSON* pJsonStruct = oJsonObject.m_pJsonData;
+    oJsonObject.m_pJsonData = NULL;
+    if (pJsonStruct == NULL)
+    {
+        m_strErrMsg = "can not move a non-independent(internal) CJsonObject from one to another.";
+        return(false);
+    }
+    int iArraySizeBeforeAdd = cJSON_GetArraySize(pFocusData);
+    cJSON_AddItemToArray(pFocusData, pJsonStruct);
+    int iArraySizeAfterAdd = cJSON_GetArraySize(pFocusData);
+    if (iArraySizeAfterAdd == iArraySizeBeforeAdd)
+    {
+        return(false);
+    }
+    unsigned int uiLastIndex = (unsigned int)cJSON_GetArraySize(pFocusData) - 1;
+    for (std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.begin(); iter != m_mapJsonArrayRef.end(); )
+    {
+        if (iter->first >= uiLastIndex)
+        {
+            if (iter->second != NULL)
+            {
+                delete (iter->second);
+                iter->second = NULL;
+            }
+            m_mapJsonArrayRef.erase(iter++);
+        }
+        else
+        {
+            iter++;
+        }
+    }
+    m_uiLastArrayIndex = 0;
+    m_array_iter = m_mapJsonArrayRef.end();
+    return(true);
+}
+#else
+bool CJsonObject::Add(CJsonObject&& oJsonObject)
+{
+    cJSON* pFocusData = NULL;
+    if (m_pJsonData != NULL)
+    {
+        pFocusData = m_pJsonData;
+    }
+    else if (m_pExternJsonDataRef != NULL)
+    {
+        pFocusData = m_pExternJsonDataRef;
+    }
+    else
+    {
+        m_pJsonData = cJSON_CreateArray();
+        pFocusData = m_pJsonData;
+    }
+
+    if (pFocusData == NULL)
+    {
+        m_strErrMsg = "json data is null!";
+        return(false);
+    }
+    if (pFocusData->type != cJSON_Array)
+    {
+        m_strErrMsg = "not a json array! json object?";
+        return(false);
+    }
+    cJSON* pJsonStruct = oJsonObject.m_pJsonData;
+    oJsonObject.m_pJsonData = NULL;
+    if (pJsonStruct == NULL)
+    {
+        m_strErrMsg = "can not move a non-independent(internal) CJsonObject from one to another.";
+        return(false);
+    }
+    int iArraySizeBeforeAdd = cJSON_GetArraySize(pFocusData);
+    cJSON_AddItemToArray(pFocusData, pJsonStruct);
+    int iArraySizeAfterAdd = cJSON_GetArraySize(pFocusData);
+    if (iArraySizeAfterAdd == iArraySizeBeforeAdd)
+    {
+        return(false);
+    }
+    unsigned int uiLastIndex = (unsigned int)cJSON_GetArraySize(pFocusData) - 1;
+    for (auto iter = m_mapJsonArrayRef.begin(); iter != m_mapJsonArrayRef.end(); )
+    {
+        if (iter->first >= uiLastIndex)
+        {
+            if (iter->second != NULL)
+            {
+                delete (iter->second);
+                iter->second = NULL;
+            }
+            m_mapJsonArrayRef.erase(iter++);
+        }
+        else
+        {
+            iter++;
+        }
+    }
+    m_uiLastArrayIndex = 0;
+    m_array_iter = m_mapJsonArrayRef.end();
+    return(true);
+}
+#endif
 
 bool CJsonObject::Add(const std::string& strValue)
 {
@@ -2665,10 +3166,10 @@ bool CJsonObject::AddAsFirst(const CJsonObject& oJsonObject)
         m_strErrMsg = "not a json array! json object?";
         return(false);
     }
-    cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str());
+    cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str(), &mc_pError);
     if (pJsonStruct == NULL)
     {
-        m_strErrMsg = std::string("prase json string error at ") + cJSON_GetErrorPtr();
+        m_strErrMsg = std::string("prase json string error at ") + mc_pError;
         return(false);
     }
     int iArraySizeBeforeAdd = cJSON_GetArraySize(pFocusData);
@@ -2678,8 +3179,12 @@ bool CJsonObject::AddAsFirst(const CJsonObject& oJsonObject)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     for (std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.begin();
                     iter != m_mapJsonArrayRef.end(); )
+#else
+    for (auto iter = m_mapJsonArrayRef.begin(); iter != m_mapJsonArrayRef.end(); )
+#endif
     {
         if (iter->second != NULL)
         {
@@ -2688,8 +3193,122 @@ bool CJsonObject::AddAsFirst(const CJsonObject& oJsonObject)
         }
         m_mapJsonArrayRef.erase(iter++);
     }
+    m_uiLastArrayIndex = 0;
+    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
+
+#if __cplusplus < 201101L
+bool CJsonObject::AddAsFirstWithMove(CJsonObject& oJsonObject)
+{
+    cJSON* pFocusData = NULL;
+    if (m_pJsonData != NULL)
+    {
+        pFocusData = m_pJsonData;
+    }
+    else if (m_pExternJsonDataRef != NULL)
+    {
+        pFocusData = m_pExternJsonDataRef;
+    }
+    else
+    {
+        m_pJsonData = cJSON_CreateArray();
+        pFocusData = m_pJsonData;
+    }
+
+    if (pFocusData == NULL)
+    {
+        m_strErrMsg = "json data is null!";
+        return(false);
+    }
+    if (pFocusData->type != cJSON_Array)
+    {
+        m_strErrMsg = "not a json array! json object?";
+        return(false);
+    }
+    cJSON* pJsonStruct = oJsonObject.m_pJsonData;
+    oJsonObject.m_pJsonData = NULL;
+    if (pJsonStruct == NULL)
+    {
+        m_strErrMsg = "can not move a non-independent(internal) CJsonObject from one to another.";
+        return(false);
+    }
+    int iArraySizeBeforeAdd = cJSON_GetArraySize(pFocusData);
+    cJSON_AddItemToArrayHead(pFocusData, pJsonStruct);
+    int iArraySizeAfterAdd = cJSON_GetArraySize(pFocusData);
+    if (iArraySizeAfterAdd == iArraySizeBeforeAdd)
+    {
+        return(false);
+    }
+    for (std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.begin(); iter != m_mapJsonArrayRef.end(); )
+    {
+        if (iter->second != NULL)
+        {
+            delete (iter->second);
+            iter->second = NULL;
+        }
+        m_mapJsonArrayRef.erase(iter++);
+    }
+    m_uiLastArrayIndex = 0;
+    m_array_iter = m_mapJsonArrayRef.end();
+    return(true);
+}
+#else
+bool CJsonObject::AddAsFirst(CJsonObject&& oJsonObject)
+{
+    cJSON* pFocusData = NULL;
+    if (m_pJsonData != NULL)
+    {
+        pFocusData = m_pJsonData;
+    }
+    else if (m_pExternJsonDataRef != NULL)
+    {
+        pFocusData = m_pExternJsonDataRef;
+    }
+    else
+    {
+        m_pJsonData = cJSON_CreateArray();
+        pFocusData = m_pJsonData;
+    }
+
+    if (pFocusData == NULL)
+    {
+        m_strErrMsg = "json data is null!";
+        return(false);
+    }
+    if (pFocusData->type != cJSON_Array)
+    {
+        m_strErrMsg = "not a json array! json object?";
+        return(false);
+    }
+    cJSON* pJsonStruct = oJsonObject.m_pJsonData;
+    oJsonObject.m_pJsonData = NULL;
+    if (pJsonStruct == NULL)
+    {
+        m_strErrMsg = "can not move a non-independent(internal) CJsonObject from one to another.";
+        return(false);
+    }
+    int iArraySizeBeforeAdd = cJSON_GetArraySize(pFocusData);
+    cJSON_AddItemToArrayHead(pFocusData, pJsonStruct);
+    int iArraySizeAfterAdd = cJSON_GetArraySize(pFocusData);
+    if (iArraySizeAfterAdd == iArraySizeBeforeAdd)
+    {
+        return(false);
+    }
+    for (auto iter = m_mapJsonArrayRef.begin(); iter != m_mapJsonArrayRef.end(); )
+    {
+        if (iter->second != NULL)
+        {
+            delete (iter->second);
+            iter->second = NULL;
+        }
+        m_mapJsonArrayRef.erase(iter++);
+    }
+    m_uiLastArrayIndex = 0;
+    m_array_iter = m_mapJsonArrayRef.end();
+    return(true);
+}
+#endif
 
 bool CJsonObject::AddAsFirst(const std::string& strValue)
 {
@@ -3091,8 +3710,12 @@ bool CJsonObject::Delete(int iWhich)
         return(false);
     }
     cJSON_DeleteItemFromArray(pFocusData, iWhich);
+#if __cplusplus < 201101L
     for (std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.begin();
                     iter != m_mapJsonArrayRef.end(); )
+#else
+    for (auto iter = m_mapJsonArrayRef.begin(); iter != m_mapJsonArrayRef.end(); )
+#endif
     {
         if (iter->first >= (unsigned int)iWhich)
         {
@@ -3132,10 +3755,63 @@ bool CJsonObject::Replace(int iWhich, const CJsonObject& oJsonObject)
         m_strErrMsg = "not a json array! json object?";
         return(false);
     }
-    cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str());
+    cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str(), &mc_pError);
     if (pJsonStruct == NULL)
     {
-        m_strErrMsg = std::string("prase json string error at ") + cJSON_GetErrorPtr();
+        m_strErrMsg = std::string("prase json string error at ") + mc_pError;
+        return(false);
+    }
+    cJSON_ReplaceItemInArray(pFocusData, iWhich, pJsonStruct);
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        return(false);
+    }
+#if __cplusplus < 201101L
+    std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.find(iWhich);
+#else
+    auto iter = m_mapJsonArrayRef.find(iWhich);
+#endif
+    if (iter != m_mapJsonArrayRef.end())
+    {
+        if (iter->second != NULL)
+        {
+            delete (iter->second);
+            iter->second = NULL;
+        }
+        m_mapJsonArrayRef.erase(iter);
+    }
+    m_uiLastArrayIndex = 0;
+    m_array_iter = m_mapJsonArrayRef.end();
+    return(true);
+}
+
+#if __cplusplus < 201101L
+bool CJsonObject::ReplaceWithMove(int iWhich, CJsonObject& oJsonObject)
+{
+    cJSON* pFocusData = NULL;
+    if (m_pJsonData == NULL)
+    {
+        pFocusData = m_pExternJsonDataRef;
+    }
+    else
+    {
+        pFocusData = m_pJsonData;
+    }
+    if (pFocusData == NULL)
+    {
+        m_strErrMsg = "json data is null!";
+        return(false);
+    }
+    if (pFocusData->type != cJSON_Array)
+    {
+        m_strErrMsg = "not a json array! json object?";
+        return(false);
+    }
+    cJSON* pJsonStruct = oJsonObject.m_pJsonData;
+    oJsonObject.m_pJsonData = NULL;
+    if (pJsonStruct == NULL)
+    {
+        m_strErrMsg = "can not move a non-independent(internal) CJsonObject from one to another.";
         return(false);
     }
     cJSON_ReplaceItemInArray(pFocusData, iWhich, pJsonStruct);
@@ -3153,8 +3829,59 @@ bool CJsonObject::Replace(int iWhich, const CJsonObject& oJsonObject)
         }
         m_mapJsonArrayRef.erase(iter);
     }
+    m_uiLastArrayIndex = 0;
+    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
+#else
+bool CJsonObject::Replace(int iWhich, CJsonObject&& oJsonObject)
+{
+    cJSON* pFocusData = NULL;
+    if (m_pJsonData == NULL)
+    {
+        pFocusData = m_pExternJsonDataRef;
+    }
+    else
+    {
+        pFocusData = m_pJsonData;
+    }
+    if (pFocusData == NULL)
+    {
+        m_strErrMsg = "json data is null!";
+        return(false);
+    }
+    if (pFocusData->type != cJSON_Array)
+    {
+        m_strErrMsg = "not a json array! json object?";
+        return(false);
+    }
+    cJSON* pJsonStruct = oJsonObject.m_pJsonData;
+    oJsonObject.m_pJsonData = NULL;
+    if (pJsonStruct == NULL)
+    {
+        m_strErrMsg = "can not move a non-independent(internal) CJsonObject from one to another.";
+        return(false);
+    }
+    cJSON_ReplaceItemInArray(pFocusData, iWhich, pJsonStruct);
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        return(false);
+    }
+    auto iter = m_mapJsonArrayRef.find(iWhich);
+    if (iter != m_mapJsonArrayRef.end())
+    {
+        if (iter->second != NULL)
+        {
+            delete (iter->second);
+            iter->second = NULL;
+        }
+        m_mapJsonArrayRef.erase(iter);
+    }
+    m_uiLastArrayIndex = 0;
+    m_array_iter = m_mapJsonArrayRef.end();
+    return(true);
+}
+#endif
 
 bool CJsonObject::Replace(int iWhich, const std::string& strValue)
 {
@@ -3182,7 +3909,11 @@ bool CJsonObject::Replace(int iWhich, const std::string& strValue)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.find(iWhich);
+#else
+    auto iter = m_mapJsonArrayRef.find(iWhich);
+#endif
     if (iter != m_mapJsonArrayRef.end())
     {
         if (iter->second != NULL)
@@ -3226,7 +3957,11 @@ bool CJsonObject::Replace(int iWhich, int32 iValue)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.find(iWhich);
+#else
+    auto iter = m_mapJsonArrayRef.find(iWhich);
+#endif
     if (iter != m_mapJsonArrayRef.end())
     {
         if (iter->second != NULL)
@@ -3270,7 +4005,11 @@ bool CJsonObject::Replace(int iWhich, uint32 uiValue)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.find(iWhich);
+#else
+    auto iter = m_mapJsonArrayRef.find(iWhich);
+#endif
     if (iter != m_mapJsonArrayRef.end())
     {
         if (iter->second != NULL)
@@ -3314,7 +4053,11 @@ bool CJsonObject::Replace(int iWhich, int64 llValue)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.find(iWhich);
+#else
+    auto iter = m_mapJsonArrayRef.find(iWhich);
+#endif
     if (iter != m_mapJsonArrayRef.end())
     {
         if (iter->second != NULL)
@@ -3358,7 +4101,11 @@ bool CJsonObject::Replace(int iWhich, uint64 ullValue)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.find(iWhich);
+#else
+    auto iter = m_mapJsonArrayRef.find(iWhich);
+#endif
     if (iter != m_mapJsonArrayRef.end())
     {
         if (iter->second != NULL)
@@ -3402,7 +4149,11 @@ bool CJsonObject::Replace(int iWhich, bool bValue, bool bValueAgain)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.find(iWhich);
+#else
+    auto iter = m_mapJsonArrayRef.find(iWhich);
+#endif
     if (iter != m_mapJsonArrayRef.end())
     {
         if (iter->second != NULL)
@@ -3446,7 +4197,11 @@ bool CJsonObject::Replace(int iWhich, float fValue)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.find(iWhich);
+#else
+    auto iter = m_mapJsonArrayRef.find(iWhich);
+#endif
     if (iter != m_mapJsonArrayRef.end())
     {
         if (iter->second != NULL)
@@ -3490,7 +4245,11 @@ bool CJsonObject::Replace(int iWhich, double dValue)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.find(iWhich);
+#else
+    auto iter = m_mapJsonArrayRef.find(iWhich);
+#endif
     if (iter != m_mapJsonArrayRef.end())
     {
         if (iter->second != NULL)
@@ -3534,7 +4293,11 @@ bool CJsonObject::ReplaceWithNull(int iWhich)
     {
         return(false);
     }
+#if __cplusplus < 201101L
     std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.find(iWhich);
+#else
+    auto iter = m_mapJsonArrayRef.find(iWhich);
+#endif
     if (iter != m_mapJsonArrayRef.end())
     {
         if (iter->second != NULL)

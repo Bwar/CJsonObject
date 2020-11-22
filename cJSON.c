@@ -38,12 +38,14 @@
 #define UINT_MAX   4294967295U
 #endif
 
+/* remove global variable for thread safe. --by Bwar on 2020-11-15
 static const char *ep;
 
 const char *cJSON_GetErrorPtr()
 {
     return ep;
 }
+*/
 
 static int cJSON_strcasecmp(const char *s1, const char *s2)
 {
@@ -214,7 +216,7 @@ static char *print_int(cJSON *item)
 /* Parse the input text into an unescaped cstring, and populate item. */
 static const unsigned char firstByteMark[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0,
                 0xF8, 0xFC };
-static const char *parse_string(cJSON *item, const char *str)
+static const char *parse_string(cJSON *item, const char *str, const char **ep)
 {
     const char *ptr = str + 1;
     char *ptr2;
@@ -223,7 +225,7 @@ static const char *parse_string(cJSON *item, const char *str)
     unsigned uc, uc2;
     if (*str != '\"')
     {
-        ep = str;
+        *ep = str;
         return 0;
     } /* not a string! */
 
@@ -394,11 +396,11 @@ static char *print_string(cJSON *item)
 }
 
 /* Predeclare these prototypes. */
-static const char *parse_value(cJSON *item, const char *value);
+static const char *parse_value(cJSON *item, const char *value, const char **ep);
 static char *print_value(cJSON *item, int depth, int fmt);
-static const char *parse_array(cJSON *item, const char *value);
+static const char *parse_array(cJSON *item, const char *value, const char **ep);
 static char *print_array(cJSON *item, int depth, int fmt);
-static const char *parse_object(cJSON *item, const char *value);
+static const char *parse_object(cJSON *item, const char *value, const char **ep);
 static char *print_object(cJSON *item, int depth, int fmt);
 
 /* Utility to jump whitespace and cr/lf */
@@ -410,14 +412,14 @@ static const char *skip(const char *in)
 }
 
 /* Parse an object - create a new root, and populate. */
-cJSON *cJSON_Parse(const char *value)
+cJSON *cJSON_Parse(const char *value, const char **ep)
 {
     cJSON *c = cJSON_New_Item();
-    ep = 0;
+    *ep = 0;
     if (!c)
         return 0; /* memory fail */
 
-    if (!parse_value(c, skip(value)))
+    if (!parse_value(c, skip(value), ep))
     {
         cJSON_Delete(c);
         return 0;
@@ -436,7 +438,7 @@ char *cJSON_PrintUnformatted(cJSON *item)
 }
 
 /* Parser core - when encountering text, process appropriately. */
-static const char *parse_value(cJSON *item, const char *value)
+static const char *parse_value(cJSON *item, const char *value, const char **ep)
 {
     if (!value)
         return 0; /* Fail on null. */
@@ -458,7 +460,7 @@ static const char *parse_value(cJSON *item, const char *value)
     }
     if (*value == '\"')
     {
-        return parse_string(item, value);
+        return parse_string(item, value, ep);
     }
     if (*value == '-' || (*value >= '0' && *value <= '9'))
     {
@@ -466,14 +468,14 @@ static const char *parse_value(cJSON *item, const char *value)
     }
     if (*value == '[')
     {
-        return parse_array(item, value);
+        return parse_array(item, value, ep);
     }
     if (*value == '{')
     {
-        return parse_object(item, value);
+        return parse_object(item, value, ep);
     }
 
-    ep = value;
+    *ep = value;
     return 0; /* failure. */
 }
 
@@ -514,12 +516,12 @@ static char *print_value(cJSON *item, int depth, int fmt)
 }
 
 /* Build an array from input text. */
-static const char *parse_array(cJSON *item, const char *value)
+static const char *parse_array(cJSON *item, const char *value, const char **ep)
 {
     cJSON *child;
     if (*value != '[')
     {
-        ep = value;
+        *ep = value;
         return 0;
     } /* not an array! */
 
@@ -531,7 +533,7 @@ static const char *parse_array(cJSON *item, const char *value)
     item->child = child = cJSON_New_Item();
     if (!item->child)
         return 0; /* memory fail */
-    value = skip(parse_value(child, skip(value))); /* skip any spacing, get the value. */
+    value = skip(parse_value(child, skip(value), ep)); /* skip any spacing, get the value. */
     if (!value)
         return 0;
 
@@ -543,14 +545,14 @@ static const char *parse_array(cJSON *item, const char *value)
         child->next = new_item;
         new_item->prev = child;
         child = new_item;
-        value = skip(parse_value(child, skip(value + 1)));
+        value = skip(parse_value(child, skip(value + 1), ep));
         if (!value)
             return 0; /* memory fail */
     }
 
     if (*value == ']')
         return value + 1; /* end of array */
-    ep = value;
+    *ep = value;
     return 0; /* malformed. */
 }
 
@@ -625,12 +627,12 @@ static char *print_array(cJSON *item, int depth, int fmt)
 }
 
 /* Build an object from the text. */
-static const char *parse_object(cJSON *item, const char *value)
+static const char *parse_object(cJSON *item, const char *value, const char **ep)
 {
     cJSON *child;
     if (*value != '{')
     {
-        ep = value;
+        *ep = value;
         return 0;
     } /* not an object! */
 
@@ -642,17 +644,17 @@ static const char *parse_object(cJSON *item, const char *value)
     item->child = child = cJSON_New_Item();
     if (!item->child)
         return 0;
-    value = skip(parse_string(child, skip(value)));
+    value = skip(parse_string(child, skip(value), ep));
     if (!value)
         return 0;
     child->string = child->valuestring;
     child->valuestring = 0;
     if (*value != ':')
     {
-        ep = value;
+        *ep = value;
         return 0;
     } /* fail! */
-    value = skip(parse_value(child, skip(value + 1))); /* skip any spacing, get the value. */
+    value = skip(parse_value(child, skip(value + 1), ep)); /* skip any spacing, get the value. */
     if (!value)
         return 0;
 
@@ -664,24 +666,24 @@ static const char *parse_object(cJSON *item, const char *value)
         child->next = new_item;
         new_item->prev = child;
         child = new_item;
-        value = skip(parse_string(child, skip(value + 1)));
+        value = skip(parse_string(child, skip(value + 1), ep));
         if (!value)
             return 0;
         child->string = child->valuestring;
         child->valuestring = 0;
         if (*value != ':')
         {
-            ep = value;
+            *ep = value;
             return 0;
         } /* fail! */
-        value = skip(parse_value(child, skip(value + 1))); /* skip any spacing, get the value. */
+        value = skip(parse_value(child, skip(value + 1), ep)); /* skip any spacing, get the value. */
         if (!value)
             return 0;
     }
 
     if (*value == '}')
         return value + 1; /* end of array */
-    ep = value;
+    *ep = value;
     return 0; /* malformed. */
 }
 

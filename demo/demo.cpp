@@ -114,5 +114,17 @@ int main(int argc, char* argv[])
      oJson["test_float"].AddNull();
      std::cout << oJson.ToString() << std::endl;
 
+     if (oJson.KeyExist("simeout"))
+         std::cout << "timeout key exist" << std::endl;
+
+     neb::CJsonObject oLongLong("{\"long_long\":1283949231388184576}");
+     int64 llValue = 0;
+     uint64 ullValue = 0;
+     oLongLong.Get("long_long", llValue);
+     oLongLong.Get("long_long", ullValue);
+     std::cout << "llValue = " << llValue << ",  ullValue = " << ullValue << std::endl;
+     //oJson.Add("json_move", std::move(oLongLong)); // C++11
+     oJson.AddWithMove("json_move", oLongLong);  
+     std::cout << oJson.ToString() << std::endl;
 }
 

@@ -1,7 +1,9 @@
 CC = gcc
 CXX = g++
-CFLAGS = -g -O2 
-CXXFLAG =  -O2 -Wall -ggdb -m64 -D_GNU_SOURCE=1 -D_REENTRANT -D__GUNC__ 
+CFLAGS = -g -O2 -Wall -ggdb -m64 -D_GNU_SOURCE=1 -D_REENTRANT -D__GUNC__ 
+cplusplus_version=$(shell g++ -dumpversion | awk '{if ($$NF > 5.0) print "c++14"; else print "c++11";}')
+#CXXFLAG = -std=$(cplusplus_version) -g -O2 -Wall -ggdb -m64 -D_GNU_SOURCE=1 -D_REENTRANT -D__GUNC__ 
+CXXFLAG = -std=c++03 -g -O2 -Wall -ggdb -m64 -D_GNU_SOURCE=1 -D_REENTRANT -D__GUNC__ 
 
 ARCH:=$(shell uname -m)
 
@@ -40,9 +42,7 @@ CJsonObjectTest:$(OBJS)
 %.o:%.cc
 	$(CXX) $(INC) $(CXXFLAG) -c -o $@ $< $(LDFLAGS)
 %.o:%.c
-	$(CC) $(INC) $(CXXFLAG) -c -o $@ $< $(LDFLAGS)
+	$(CC) $(INC) $(CFLAG) -c -o $@ $< $(LDFLAGS)
 clean:
 	rm -f $(OBJS)
 	rm -f $(TARGET)
-        
-        
