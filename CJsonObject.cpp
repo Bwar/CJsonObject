@@ -290,6 +290,8 @@ CJsonObject& CJsonObject::operator[](const std::string& strKey)
     }
     else
     {
+        m_object_iter = iter;
+        m_strLastObjectKey = strKey;
         return(*(iter->second));
     }
 }
@@ -337,6 +339,8 @@ CJsonObject& CJsonObject::operator[](unsigned int uiWhich)
     }
     else
     {
+        m_uiLastArrayIndex = uiWhich;
+        m_array_iter = iter;
         return(*(iter->second));
     }
 }
