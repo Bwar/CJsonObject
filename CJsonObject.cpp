@@ -148,6 +148,8 @@ bool CJsonObject::AddEmptySubObject(const std::string& strKey)
     }
     cJSON_AddItemToObject(pFocusData, strKey.c_str(), pJsonStruct);
     m_pKeyTravers = pFocusData;
+    m_strLastObjectKey = "";
+    m_object_iter = m_mapJsonObjectRef.end();
     return(true);
 }
 
@@ -192,6 +194,8 @@ bool CJsonObject::AddEmptySubArray(const std::string& strKey)
     }
     cJSON_AddItemToObject(pFocusData, strKey.c_str(), pJsonStruct);
     m_pKeyTravers = pFocusData;
+    m_uiLastArrayIndex = 0;
+    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
 
@@ -1653,6 +1657,8 @@ bool CJsonObject::Delete(const std::string& strKey)
         m_mapJsonObjectRef.erase(iter);
     }
     m_pKeyTravers = pFocusData;
+    m_strLastObjectKey = "";
+    m_object_iter = m_mapJsonObjectRef.end();
     return(true);
 }
 
@@ -3735,6 +3741,8 @@ bool CJsonObject::Delete(int iWhich)
             iter++;
         }
     }
+    m_uiLastArrayIndex = 0;
+    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
 
