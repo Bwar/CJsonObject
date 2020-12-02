@@ -7,7 +7,7 @@
  * @note
  * Modify history:
  ******************************************************************************/
-
+#include <sstream>
 #include "CJsonObject.hpp"
 
 #ifdef _WIN32
@@ -16,7 +16,6 @@
 
 namespace neb
 {
-
 CJsonObject::CJsonObject()
     : m_pJsonData(NULL), m_pExternJsonDataRef(NULL), m_pKeyTravers(NULL)
 {
@@ -611,6 +610,15 @@ bool CJsonObject::IsArray() const
     }
 }
 
+template <typename T>
+std::string to_stringP(const T a_value, const int n = 2)
+{
+    std::ostringstream out;
+    out.precision(n);
+    out << std::fixed << a_value;
+    return out.str();
+}
+
 std::string CJsonObject::ToString() const
 {
     char* pJsonString = NULL;
@@ -709,7 +717,7 @@ bool CJsonObject::Get(const std::string& strKey, CJsonObject& oJsonObject) const
     }
 }
 
-bool CJsonObject::Get(const std::string& strKey, std::string& strValue) const
+bool CJsonObject::Get(const std::string& strKey, std::string& strValue,int precision) const
 {
     cJSON* pJsonStruct = NULL;
     if (m_pJsonData != NULL)
@@ -732,7 +740,19 @@ bool CJsonObject::Get(const std::string& strKey, std::string& strValue) const
     }
     if (pJsonStruct->type != cJSON_String)
     {
-        return(false);
+        if (pJsonStruct->type == cJSON_Int)
+        {
+            strValue = std::to_string(pJsonStruct->valueint);
+            return(true);
+        }
+        else if (pJsonStruct->type == cJSON_Double)
+        {
+            strValue = to_stringP(pJsonStruct->valuedouble, precision);
+            return(true);
+        }
+        else {
+            return(false);
+        }
     }
     strValue = pJsonStruct->valuestring;
     return(true);
@@ -2296,7 +2316,7 @@ bool CJsonObject::Get(int iWhich, CJsonObject& oJsonObject) const
     }
 }
 
-bool CJsonObject::Get(int iWhich, std::string& strValue) const
+bool CJsonObject::Get(int iWhich, std::string& strValue,int precision) const
 {
     cJSON* pJsonStruct = NULL;
     if (m_pJsonData != NULL)
@@ -2319,7 +2339,19 @@ bool CJsonObject::Get(int iWhich, std::string& strValue) const
     }
     if (pJsonStruct->type != cJSON_String)
     {
-        return(false);
+        if (pJsonStruct->type == cJSON_Int)
+        {
+            strValue = std::to_string(pJsonStruct->valueint);
+            return(true);
+        }
+        else if (pJsonStruct->type == cJSON_Double)
+        {
+            strValue = to_stringP(pJsonStruct->valuedouble, precision);
+            return(true);
+        }
+        else {
+            return(false);
+        }
     }
     strValue = pJsonStruct->valuestring;
     return(true);
