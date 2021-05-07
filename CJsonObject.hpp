@@ -207,8 +207,6 @@ private:
     cJSON* m_pKeyTravers;
     const char* mc_pError;
     std::string m_strErrMsg;
-    uint32 m_uiLastArrayIndex;       // corresponds with m_array_iter
-    std::string m_strLastObjectKey;  // corresponds with m_object_iter
 #if __cplusplus < 201101L
     std::map<unsigned int, CJsonObject*> m_mapJsonArrayRef;
     std::map<unsigned int, CJsonObject*>::iterator m_array_iter;

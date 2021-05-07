@@ -118,8 +118,13 @@ void cJSON_Delete(cJSON *c)
 /* Parse the input text to generate a number, and populate the result into item. */
 static const char *parse_number(cJSON *item, const char *num)
 {
-    long double n = 0, scale = 0;
-    int subscale = 0, signsubscale = 1;
+    int64 n = 0;
+    double d = 0.0;
+    double base = 0.0;
+    double point = 0.1;
+    int scale = 0.0;
+    int subscale = 0;
+    int signsubscale = 1;
     item->sign = 1;
 
     /* Could use sscanf for this? */
@@ -127,15 +132,22 @@ static const char *parse_number(cJSON *item, const char *num)
         item->sign = -1, num++; /* Has sign? */
     if (*num == '0')
         num++; /* is zero */
-    if (*num >= '1' && *num <= '9')
-        do
-            n = (n * 10.0) + (*num++ - '0');
-        while (*num >= '0' && *num <= '9'); /* Number? */
+    while (*num >= '0' && *num <= '9')
+    {
+        n = (n * 10) + (*num++ - '0');
+    }
+    d = n;
     if (*num == '.' && num[1] >= '0' && num[1] <= '9')
     {
         num++;
+        base = d;
         do
-            n = (n * 10.0) + (*num++ - '0'), scale--;
+        {
+            d += point * (*num - '0');
+            point *= 0.1;
+            base = (base * 10.0) + (*num - '0'), scale--;
+            ++num;
+        }
         while (*num >= '0' && *num <= '9');
     } /* Fractional part? */
     if (*num == 'e' || *num == 'E') /* Exponent? */
@@ -151,15 +163,20 @@ static const char *parse_number(cJSON *item, const char *num)
 
     if (scale == 0 && subscale == 0)
     {
-        item->valuedouble = (double)(item->sign * n);
-        item->valueint = item->sign * (int64)n;
+        item->valuedouble = item->sign * d;
+        item->valueint = item->sign * n;
         item->type = cJSON_Int;
     }
     else
     {
-        n = item->sign * n * pow(10.0, (scale + subscale * signsubscale)); /* number = +/- number.fraction * 10^+/- exponent */
-        item->valuedouble = (double)n;
-        item->valueint = (int64)n;
+        printf("subscale = %d, signsubscale = %d, s = %.16f\n", subscale, signsubscale, d);
+        if (subscale != 0)
+        {
+            d = item->sign * base * pow(10.0, (scale + subscale * signsubscale)); /* number = +/- number.fraction * 10^+/- exponent */
+        }
+        item->valuedouble = d;
+        item->valueint = n;
+        printf("d = %.16f, base = %.16f, valuedouble = %.16f\n", d, base, item->valuedouble);
         item->type = cJSON_Double;
     }
     return num;
@@ -173,10 +190,7 @@ static char *print_double(cJSON *item)
     str = (char*) cJSON_malloc(64); /* This is a nice tradeoff. */
     if (str)
     {
-        if (fabs(d) < 1.0e-6 || fabs(d) > 1.0e9)
-            sprintf(str, "%lf", d);
-        else
-            sprintf(str, "%f", d);
+        sprintf(str, "%.16f", d);
     }
     return str;
 }

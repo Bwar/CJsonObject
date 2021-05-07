@@ -148,8 +148,6 @@ bool CJsonObject::AddEmptySubObject(const std::string& strKey)
     }
     cJSON_AddItemToObject(pFocusData, strKey.c_str(), pJsonStruct);
     m_pKeyTravers = pFocusData;
-    m_strLastObjectKey = "";
-    m_object_iter = m_mapJsonObjectRef.end();
     return(true);
 }
 
@@ -194,8 +192,6 @@ bool CJsonObject::AddEmptySubArray(const std::string& strKey)
     }
     cJSON_AddItemToObject(pFocusData, strKey.c_str(), pJsonStruct);
     m_pKeyTravers = pFocusData;
-    m_uiLastArrayIndex = 0;
-    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
 
@@ -253,10 +249,6 @@ void CJsonObject::ResetTraversing()
 
 CJsonObject& CJsonObject::operator[](const std::string& strKey)
 {
-    if (strKey == m_strLastObjectKey && m_object_iter != m_mapJsonObjectRef.end())
-    {
-        return(*(m_object_iter->second));
-    }
 #if __cplusplus < 201101L
     std::map<std::string, CJsonObject*>::iterator iter = m_mapJsonObjectRef.find(strKey);
 #else
@@ -294,18 +286,12 @@ CJsonObject& CJsonObject::operator[](const std::string& strKey)
     }
     else
     {
-        m_object_iter = iter;
-        m_strLastObjectKey = strKey;
         return(*(iter->second));
     }
 }
 
 CJsonObject& CJsonObject::operator[](unsigned int uiWhich)
 {
-    if (uiWhich == m_uiLastArrayIndex && m_array_iter != m_mapJsonArrayRef.end())
-    {
-        return(*(m_array_iter->second));
-    }
 #if __cplusplus < 201101L
     std::map<unsigned int, CJsonObject*>::iterator iter = m_mapJsonArrayRef.find(uiWhich);
 #else
@@ -343,8 +329,6 @@ CJsonObject& CJsonObject::operator[](unsigned int uiWhich)
     }
     else
     {
-        m_uiLastArrayIndex = uiWhich;
-        m_array_iter = iter;
         return(*(iter->second));
     }
 }
@@ -1048,8 +1032,6 @@ bool CJsonObject::Add(const std::string& strKey, const CJsonObject& oJsonObject)
         m_mapJsonObjectRef.erase(iter);
     }
     m_pKeyTravers = pFocusData;
-    m_strLastObjectKey = "";
-    m_object_iter = m_mapJsonObjectRef.end();
     return(true);
 }
 
@@ -1110,8 +1092,6 @@ bool CJsonObject::AddWithMove(const std::string& strKey, CJsonObject& oJsonObjec
         m_mapJsonObjectRef.erase(iter);
     }
     m_pKeyTravers = pFocusData;
-    m_strLastObjectKey = "";
-    m_object_iter = m_mapJsonObjectRef.end();
     return(true);
 }
 #else
@@ -1171,8 +1151,6 @@ bool CJsonObject::Add(const std::string& strKey, CJsonObject&& oJsonObject)
         m_mapJsonObjectRef.erase(iter);
     }
     m_pKeyTravers = pFocusData;
-    m_strLastObjectKey = "";
-    m_object_iter = m_mapJsonObjectRef.end();
     return(true);
 }
 #endif
@@ -1657,8 +1635,6 @@ bool CJsonObject::Delete(const std::string& strKey)
         m_mapJsonObjectRef.erase(iter);
     }
     m_pKeyTravers = pFocusData;
-    m_strLastObjectKey = "";
-    m_object_iter = m_mapJsonObjectRef.end();
     return(true);
 }
 
@@ -1708,8 +1684,6 @@ bool CJsonObject::Replace(const std::string& strKey, const CJsonObject& oJsonObj
         }
         m_mapJsonObjectRef.erase(iter);
     }
-    m_strLastObjectKey = "";
-    m_object_iter = m_mapJsonObjectRef.end();
     return(true);
 }
 
@@ -1757,8 +1731,6 @@ bool CJsonObject::ReplaceWithMove(const std::string& strKey, CJsonObject& oJsonO
         }
         m_mapJsonObjectRef.erase(iter);
     }
-    m_strLastObjectKey = "";
-    m_object_iter = m_mapJsonObjectRef.end();
     return(true);
 }
 #else
@@ -1805,8 +1777,6 @@ bool CJsonObject::Replace(const std::string& strKey, CJsonObject&& oJsonObject)
         }
         m_mapJsonObjectRef.erase(iter);
     }
-    m_strLastObjectKey = "";
-    m_object_iter = m_mapJsonObjectRef.end();
     return(true);
 }
 #endif
@@ -2638,8 +2608,6 @@ bool CJsonObject::Add(const CJsonObject& oJsonObject)
             iter++;
         }
     }
-    m_uiLastArrayIndex = 0;
-    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
 
@@ -2702,8 +2670,6 @@ bool CJsonObject::AddWithMove(CJsonObject& oJsonObject)
             iter++;
         }
     }
-    m_uiLastArrayIndex = 0;
-    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
 #else
@@ -2765,8 +2731,6 @@ bool CJsonObject::Add(CJsonObject&& oJsonObject)
             iter++;
         }
     }
-    m_uiLastArrayIndex = 0;
-    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
 #endif
@@ -3203,8 +3167,6 @@ bool CJsonObject::AddAsFirst(const CJsonObject& oJsonObject)
         }
         m_mapJsonArrayRef.erase(iter++);
     }
-    m_uiLastArrayIndex = 0;
-    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
 
@@ -3259,8 +3221,6 @@ bool CJsonObject::AddAsFirstWithMove(CJsonObject& oJsonObject)
         }
         m_mapJsonArrayRef.erase(iter++);
     }
-    m_uiLastArrayIndex = 0;
-    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
 #else
@@ -3314,8 +3274,6 @@ bool CJsonObject::AddAsFirst(CJsonObject&& oJsonObject)
         }
         m_mapJsonArrayRef.erase(iter++);
     }
-    m_uiLastArrayIndex = 0;
-    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
 #endif
@@ -3741,8 +3699,6 @@ bool CJsonObject::Delete(int iWhich)
             iter++;
         }
     }
-    m_uiLastArrayIndex = 0;
-    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
 
@@ -3792,8 +3748,6 @@ bool CJsonObject::Replace(int iWhich, const CJsonObject& oJsonObject)
         }
         m_mapJsonArrayRef.erase(iter);
     }
-    m_uiLastArrayIndex = 0;
-    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
 
@@ -3841,8 +3795,6 @@ bool CJsonObject::ReplaceWithMove(int iWhich, CJsonObject& oJsonObject)
         }
         m_mapJsonArrayRef.erase(iter);
     }
-    m_uiLastArrayIndex = 0;
-    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
 #else
@@ -3889,8 +3841,6 @@ bool CJsonObject::Replace(int iWhich, CJsonObject&& oJsonObject)
         }
         m_mapJsonArrayRef.erase(iter);
     }
-    m_uiLastArrayIndex = 0;
-    m_array_iter = m_mapJsonArrayRef.end();
     return(true);
 }
 #endif
