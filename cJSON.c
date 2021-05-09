@@ -119,7 +119,7 @@ void cJSON_Delete(cJSON *c)
 static const char *parse_number(cJSON *item, const char *num)
 {
     int64 n = 0;
-    double d = 0.0;
+    long double d = 0.0;
     double base = 0.0;
     double point = 0.1;
     int scale = 0.0;
@@ -190,7 +190,7 @@ static char *print_double(cJSON *item)
     str = (char*) cJSON_malloc(64); /* This is a nice tradeoff. */
     if (str)
     {
-        sprintf(str, "%.16f", d);
+        sprintf(str, "%.15f", d);
     }
     return str;
 }
