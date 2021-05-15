@@ -169,14 +169,12 @@ static const char *parse_number(cJSON *item, const char *num)
     }
     else
     {
-        printf("subscale = %d, signsubscale = %d, s = %.16f\n", subscale, signsubscale, d);
         if (subscale != 0)
         {
             d = item->sign * base * pow(10.0, (scale + subscale * signsubscale)); /* number = +/- number.fraction * 10^+/- exponent */
         }
         item->valuedouble = d;
         item->valueint = n;
-        printf("d = %.16f, base = %.16f, valuedouble = %.16f\n", d, base, item->valuedouble);
         item->type = cJSON_Double;
     }
     return num;
