@@ -81,6 +81,7 @@ public:     // method of ordinary json object
     bool Get(const std::string& strKey, bool& bValue) const;
     bool Get(const std::string& strKey, float& fValue) const;
     bool Get(const std::string& strKey, double& dValue) const;
+    int GetValueType(const std::string& strKey) const;
     bool IsNull(const std::string& strKey) const;
     bool Add(const std::string& strKey, const CJsonObject& oJsonObject);
 #if __cplusplus < 201101L
@@ -150,6 +151,7 @@ public:     // method of json array
     bool Get(int iWhich, bool& bValue) const;
     bool Get(int iWhich, float& fValue) const;
     bool Get(int iWhich, double& dValue) const;
+    int GetValueType(int iWhich) const;
     bool IsNull(int iWhich) const;
     bool Add(const CJsonObject& oJsonObject);
 #if __cplusplus < 201101L

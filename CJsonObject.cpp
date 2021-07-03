@@ -945,6 +945,30 @@ bool CJsonObject::Get(const std::string& strKey, double& dValue) const
     return(false);
 }
 
+int CJsonObject::GetValueType(const std::string& strKey) const
+{
+    cJSON* pJsonStruct = NULL;
+    if (m_pJsonData != NULL)
+    {
+        if (m_pJsonData->type == cJSON_Object)
+        {
+            pJsonStruct = cJSON_GetObjectItem(m_pJsonData, strKey.c_str());
+        }
+    }
+    else if (m_pExternJsonDataRef != NULL)
+    {
+        if(m_pExternJsonDataRef->type == cJSON_Object)
+        {
+            pJsonStruct = cJSON_GetObjectItem(m_pExternJsonDataRef, strKey.c_str());
+        }
+    }
+    if (pJsonStruct == NULL)
+    {
+        return(false);
+    }
+    return(pJsonStruct->type);
+}
+
 bool CJsonObject::IsNull(const std::string& strKey) const
 {
     cJSON* pJsonStruct = NULL;
@@ -2516,6 +2540,30 @@ bool CJsonObject::Get(int iWhich, double& dValue) const
         return(true);
     }
     return(false);
+}
+
+int CJsonObject::GetValueType(int iWhich) const
+{
+    cJSON* pJsonStruct = NULL;
+    if (m_pJsonData != NULL)
+    {
+        if (m_pJsonData->type == cJSON_Array)
+        {
+            pJsonStruct = cJSON_GetArrayItem(m_pJsonData, iWhich);
+        }
+    }
+    else if (m_pExternJsonDataRef != NULL)
+    {
+        if(m_pExternJsonDataRef->type == cJSON_Array)
+        {
+            pJsonStruct = cJSON_GetArrayItem(m_pExternJsonDataRef, iWhich);
+        }
+    }
+    if (pJsonStruct == NULL)
+    {
+        return(false);
+    }
+    return(pJsonStruct->type);
 }
 
 bool CJsonObject::IsNull(int iWhich) const
