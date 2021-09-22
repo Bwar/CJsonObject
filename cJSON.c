@@ -172,6 +172,8 @@ static const char *parse_number(cJSON *item, const char *num)
         if (subscale != 0)
         {
             d = item->sign * base * pow(10.0, (scale + subscale * signsubscale)); /* number = +/- number.fraction * 10^+/- exponent */
+        } else {
+            d = item->sign * d;
         }
         item->valuedouble = d;
         item->valueint = n;
