@@ -384,7 +384,7 @@ std::string CJsonObject::operator()(const std::string& strKey) const
             }
             else
             {
-#if LLONG_MAX==LLONG_MAX
+#if LLONG_MAX==LONG_MAX
                 snprintf(szNumber, sizeof(szNumber), "%lu", pJsonStruct->valueint);
 #else
                 snprintf(szNumber, sizeof(szNumber), "%llu", pJsonStruct->valueint);
@@ -453,7 +453,7 @@ std::string CJsonObject::operator()(unsigned int uiWhich) const
             }
             else
             {
-#if LLONG_MAX==LLONG_MAX
+#if LLONG_MAX==LONG_MAX
                 snprintf(szNumber, sizeof(szNumber), "%ld", (int64)pJsonStruct->valueint);
 #else
                 snprintf(szNumber, sizeof(szNumber), "%lld", (int64)pJsonStruct->valueint);
@@ -468,7 +468,7 @@ std::string CJsonObject::operator()(unsigned int uiWhich) const
             }
             else
             {
-#if LLONG_MAX==LLONG_MAX
+#if LLONG_MAX==LONG_MAX
                 snprintf(szNumber, sizeof(szNumber), "%lu", pJsonStruct->valueint);
 #else
                 snprintf(szNumber, sizeof(szNumber), "%llu", pJsonStruct->valueint);
