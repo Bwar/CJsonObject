@@ -209,7 +209,11 @@ static char *print_int(cJSON *item)
             }
             else
             {
+#if LLONG_MAX==LONG_MAX
                 sprintf(str, "%ld", (int64)item->valueint);
+#else
+                sprintf(str, "%lld", (int64)item->valueint);
+#endif
             }
         }
         else
@@ -220,7 +224,11 @@ static char *print_int(cJSON *item)
             }
             else
             {
-                sprintf(str, "%lu", item->valueint);
+#if LLONG_MAX==LONG_MAX
+                sprintf(str, "%lu", (uint64)item->valueint);
+#else
+                sprintf(str, "%llu", (uint64)item->valueint);
+#endif
             }
         }
     }
