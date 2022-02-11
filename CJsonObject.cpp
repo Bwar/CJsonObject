@@ -85,6 +85,8 @@ CJsonObject& CJsonObject::operator=(const CJsonObject& oJsonObject)
 #if __cplusplus >= 201101L
 CJsonObject& CJsonObject::operator=(CJsonObject&& oJsonObject)
 {
+    Clear();
+    
     m_pJsonData = oJsonObject.m_pJsonData;
     oJsonObject.m_pJsonData = NULL;
     m_pExternJsonDataRef = oJsonObject.m_pExternJsonDataRef;
