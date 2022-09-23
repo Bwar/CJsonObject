@@ -67,8 +67,8 @@ public:     // method of ordinary json object or json array
 public:     // method of ordinary json object
     bool AddEmptySubObject(const std::string& strKey);
     bool AddEmptySubArray(const std::string& strKey);
-    bool GetKey(std::string& strKey);
-    void ResetTraversing();
+    bool GetKey(std::string& strKey) const;
+    void ResetTraversing() const;
     CJsonObject& operator[](const std::string& strKey);
     std::string operator()(const std::string& strKey) const;
     bool KeyExist(const std::string& strKey) const;
@@ -94,7 +94,7 @@ public:     // method of ordinary json object
     bool Add(const std::string& strKey, uint32 uiValue);
     bool Add(const std::string& strKey, int64 llValue);
     bool Add(const std::string& strKey, uint64 ullValue);
-    bool Add(const std::string& strKey, bool bValue, bool bValueAgain);
+    bool Add(const std::string& strKey, const bool bValue);
     bool Add(const std::string& strKey, float fValue);
     bool Add(const std::string& strKey, double dValue);
     bool AddNull(const std::string& strKey);    // add null like this:   "key":null
@@ -206,7 +206,7 @@ private:
 private:
     cJSON* m_pJsonData;
     cJSON* m_pExternJsonDataRef;
-    cJSON* m_pKeyTravers;
+    mutable cJSON* m_pKeyTravers;
     const char* mc_pError;
     std::string m_strErrMsg;
 #if __cplusplus < 201101L

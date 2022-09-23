@@ -197,7 +197,7 @@ bool CJsonObject::AddEmptySubArray(const std::string& strKey)
     return(true);
 }
 
-bool CJsonObject::GetKey(std::string& strKey)
+bool CJsonObject::GetKey(std::string& strKey) const
 {
     if (IsArray())
     {
@@ -237,7 +237,7 @@ bool CJsonObject::GetKey(std::string& strKey)
     }
 }
 
-void CJsonObject::ResetTraversing()
+void CJsonObject::ResetTraversing() const
 {
     if (m_pJsonData != NULL)
     {
@@ -1416,7 +1416,7 @@ bool CJsonObject::Add(const std::string& strKey, uint64 ullValue)
     return(true);
 }
 
-bool CJsonObject::Add(const std::string& strKey, bool bValue, bool bValueAgain)
+bool CJsonObject::Add(const std::string& strKey, const bool bValue)
 {
     cJSON* pFocusData = NULL;
     if (m_pJsonData != NULL)
