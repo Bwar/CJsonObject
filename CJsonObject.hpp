@@ -199,6 +199,9 @@ public:     // method of json array
     bool Replace(int iWhich, float fValue);
     bool Replace(int iWhich, double dValue);
     bool ReplaceWithNull(int iWhich);      // replace with a null value
+//!< Hao Lion added Customize the memory management interface
+public:  
+    static void CJsonObject_InitHooks(void *(*malloc_fn)(size_t sz), void (*free_fn)(void *ptr));
 
 private:
     CJsonObject(cJSON* pJsonData);
