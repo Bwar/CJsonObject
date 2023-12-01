@@ -17,6 +17,27 @@
 namespace neb
 {
 
+//!< Hao_Lion added
+static void *(*CJsonObject_malloc)(size_t sz) = malloc;
+static void (*CJsonObject_free)(void *ptr) = free;
+/**
+ * @brief Customize the memory management interface
+ * @note  If you use your own memory management, you must call this function first. For exmaple you can call
+ *         neb::CJsonObject::CJsonObject_InitHooks(pvPortMalloc, vPortFree) in FreeRTOS.
+ * @param[in] malloc_fn Memory allocation function
+ * @param[in] free_fn Memory release function
+*/
+void CJsonObject::CJsonObject_InitHooks(void *(*malloc_fn)(size_t sz), void (*free_fn)(void *ptr))
+{
+
+    CJsonObject_malloc = (malloc_fn) ? malloc_fn : malloc;
+    CJsonObject_free = (free_fn) ? free_fn : free;
+    cJSON_Hooks hooks;
+    hooks.malloc_fn = malloc_fn;
+    hooks.free_fn = free_fn;
+    cJSON_InitHooks(&hooks);
+}
+
 CJsonObject::CJsonObject()
     : m_pJsonData(NULL), m_pExternJsonDataRef(NULL), m_pKeyTravers(NULL)
 {
@@ -612,7 +633,7 @@ std::string CJsonObject::ToString() const
     if (pJsonString != NULL)
     {
         strJsonData = pJsonString;
-        free(pJsonString);
+        CJsonObject_free(pJsonString);
     }
     return(strJsonData);
 }
@@ -632,7 +653,7 @@ std::string CJsonObject::ToFormattedString() const
     if (pJsonString != NULL)
     {
         strJsonData = pJsonString;
-        free(pJsonString);
+        CJsonObject_free(pJsonString);
     }
     return(strJsonData);
 }
@@ -684,7 +705,7 @@ bool CJsonObject::Get(const std::string& strKey, CJsonObject& oJsonObject) const
     }
     char* pJsonString = cJSON_Print(pJsonStruct);
     std::string strJsonData = pJsonString;
-    free(pJsonString);
+    CJsonObject_free(pJsonString);
     if (oJsonObject.Parse(strJsonData))
     {
         return(true);
@@ -2281,7 +2302,7 @@ bool CJsonObject::Get(int iWhich, CJsonObject& oJsonObject) const
     }
     char* pJsonString = cJSON_Print(pJsonStruct);
     std::string strJsonData = pJsonString;
-    free(pJsonString);
+    CJsonObject_free(pJsonString);
     if (oJsonObject.Parse(strJsonData))
     {
         return(true);
@@ -4333,5 +4354,3 @@ CJsonObject::CJsonObject(cJSON* pJsonData)
 }
 
 }
-
-
