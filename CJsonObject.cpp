@@ -1706,6 +1706,11 @@ bool CJsonObject::Replace(const std::string& strKey, const CJsonObject& oJsonObj
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        m_strErrMsg = "key not exists!";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str(), &mc_pError);
     if (pJsonStruct == NULL)
     {
@@ -1756,6 +1761,11 @@ bool CJsonObject::ReplaceWithMove(const std::string& strKey, CJsonObject& oJsonO
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        m_strErrMsg = "key not exists!";
+        return(false);
+    }
     cJSON* pJsonStruct = oJsonObject.m_pJsonData;
     oJsonObject.m_pJsonData = NULL;
     if (pJsonStruct == NULL)
@@ -1800,6 +1810,11 @@ bool CJsonObject::Replace(const std::string& strKey, CJsonObject&& oJsonObject)
     if (pFocusData->type != cJSON_Object)
     {
         m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        m_strErrMsg = "key not exists!";
         return(false);
     }
     cJSON* pJsonStruct = oJsonObject.m_pJsonData;
@@ -1847,6 +1862,11 @@ bool CJsonObject::Replace(const std::string& strKey, const std::string& strValue
     if (pFocusData->type != cJSON_Object)
     {
         m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        m_strErrMsg = "key not exists!";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateString(strValue.c_str());
@@ -1897,6 +1917,11 @@ bool CJsonObject::Replace(const std::string& strKey, int32 iValue)
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        m_strErrMsg = "key not exists!";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateInt((uint64)iValue, -1);
     if (pJsonStruct == NULL)
     {
@@ -1943,6 +1968,11 @@ bool CJsonObject::Replace(const std::string& strKey, uint32 uiValue)
     if (pFocusData->type != cJSON_Object)
     {
         m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        m_strErrMsg = "key not exists!";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateInt((uint64)uiValue, 1);
@@ -1993,6 +2023,11 @@ bool CJsonObject::Replace(const std::string& strKey, int64 llValue)
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        m_strErrMsg = "key not exists!";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateInt((uint64)llValue, -1);
     if (pJsonStruct == NULL)
     {
@@ -2039,6 +2074,11 @@ bool CJsonObject::Replace(const std::string& strKey, uint64 ullValue)
     if (pFocusData->type != cJSON_Object)
     {
         m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        m_strErrMsg = "key not exists!";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateInt((uint64)ullValue, 1);
@@ -2089,6 +2129,11 @@ bool CJsonObject::Replace(const std::string& strKey, bool bValue, bool bValueAga
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        m_strErrMsg = "key not exists!";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateBool(bValue);
     if (pJsonStruct == NULL)
     {
@@ -2135,6 +2180,11 @@ bool CJsonObject::Replace(const std::string& strKey, float fValue)
     if (pFocusData->type != cJSON_Object)
     {
         m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        m_strErrMsg = "key not exists!";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateDouble((double)fValue, -1);
@@ -2185,6 +2235,11 @@ bool CJsonObject::Replace(const std::string& strKey, double dValue)
         m_strErrMsg = "not a json object! json array?";
         return(false);
     }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        m_strErrMsg = "key not exists!";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateDouble((double)dValue, -1);
     if (pJsonStruct == NULL)
     {
@@ -2231,6 +2286,11 @@ bool CJsonObject::ReplaceWithNull(const std::string& strKey)
     if (pFocusData->type != cJSON_Object)
     {
         m_strErrMsg = "not a json object! json array?";
+        return(false);
+    }
+    if (cJSON_GetObjectItem(pFocusData, strKey.c_str()) == NULL)
+    {
+        m_strErrMsg = "key not exists!";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateNull();
@@ -3794,6 +3854,11 @@ bool CJsonObject::Replace(int iWhich, const CJsonObject& oJsonObject)
         m_strErrMsg = "not a json array! json object?";
         return(false);
     }
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        m_strErrMsg = "index not exists";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_Parse(oJsonObject.ToString().c_str(), &mc_pError);
     if (pJsonStruct == NULL)
     {
@@ -3844,6 +3909,11 @@ bool CJsonObject::ReplaceWithMove(int iWhich, CJsonObject& oJsonObject)
         m_strErrMsg = "not a json array! json object?";
         return(false);
     }
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        m_strErrMsg = "index not exists";
+        return(false);
+    }
     cJSON* pJsonStruct = oJsonObject.m_pJsonData;
     oJsonObject.m_pJsonData = NULL;
     if (pJsonStruct == NULL)
@@ -3888,6 +3958,11 @@ bool CJsonObject::Replace(int iWhich, CJsonObject&& oJsonObject)
     if (pFocusData->type != cJSON_Array)
     {
         m_strErrMsg = "not a json array! json object?";
+        return(false);
+    }
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        m_strErrMsg = "index not exists";
         return(false);
     }
     cJSON* pJsonStruct = oJsonObject.m_pJsonData;
@@ -3935,6 +4010,11 @@ bool CJsonObject::Replace(int iWhich, const std::string& strValue)
     if (pFocusData->type != cJSON_Array)
     {
         m_strErrMsg = "not a json array! json object?";
+        return(false);
+    }
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        m_strErrMsg = "index not exists";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateString(strValue.c_str());
@@ -3985,6 +4065,11 @@ bool CJsonObject::Replace(int iWhich, int32 iValue)
         m_strErrMsg = "not a json array! json object?";
         return(false);
     }
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        m_strErrMsg = "index not exists";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateInt((uint64)iValue, -1);
     if (pJsonStruct == NULL)
     {
@@ -4031,6 +4116,11 @@ bool CJsonObject::Replace(int iWhich, uint32 uiValue)
     if (pFocusData->type != cJSON_Array)
     {
         m_strErrMsg = "not a json array! json object?";
+        return(false);
+    }
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        m_strErrMsg = "index not exists";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateInt((uint64)uiValue, 1);
@@ -4081,6 +4171,11 @@ bool CJsonObject::Replace(int iWhich, int64 llValue)
         m_strErrMsg = "not a json array! json object?";
         return(false);
     }
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        m_strErrMsg = "index not exists";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateInt((uint64)((uint64)llValue), -1);
     if (pJsonStruct == NULL)
     {
@@ -4127,6 +4222,11 @@ bool CJsonObject::Replace(int iWhich, uint64 ullValue)
     if (pFocusData->type != cJSON_Array)
     {
         m_strErrMsg = "not a json array! json object?";
+        return(false);
+    }
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        m_strErrMsg = "index not exists";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateInt((uint64)ullValue, 1);
@@ -4177,6 +4277,11 @@ bool CJsonObject::Replace(int iWhich, bool bValue, bool bValueAgain)
         m_strErrMsg = "not a json array! json object?";
         return(false);
     }
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        m_strErrMsg = "index not exists";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateBool(bValue);
     if (pJsonStruct == NULL)
     {
@@ -4223,6 +4328,11 @@ bool CJsonObject::Replace(int iWhich, float fValue)
     if (pFocusData->type != cJSON_Array)
     {
         m_strErrMsg = "not a json array! json object?";
+        return(false);
+    }
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        m_strErrMsg = "index not exists";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateDouble((double)fValue, -1);
@@ -4273,6 +4383,11 @@ bool CJsonObject::Replace(int iWhich, double dValue)
         m_strErrMsg = "not a json array! json object?";
         return(false);
     }
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        m_strErrMsg = "index not exists";
+        return(false);
+    }
     cJSON* pJsonStruct = cJSON_CreateDouble((double)dValue, -1);
     if (pJsonStruct == NULL)
     {
@@ -4319,6 +4434,11 @@ bool CJsonObject::ReplaceWithNull(int iWhich)
     if (pFocusData->type != cJSON_Array)
     {
         m_strErrMsg = "not a json array! json object?";
+        return(false);
+    }
+    if (cJSON_GetArrayItem(pFocusData, iWhich) == NULL)
+    {
+        m_strErrMsg = "index not exists";
         return(false);
     }
     cJSON* pJsonStruct = cJSON_CreateNull();
