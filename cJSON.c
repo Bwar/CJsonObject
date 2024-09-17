@@ -172,8 +172,6 @@ static const char *parse_number(cJSON *item, const char *num)
         if (subscale != 0)
         {
             d = item->sign * base * pow(10.0, (scale + subscale * signsubscale)); /* number = +/- number.fraction * 10^+/- exponent */
-        } else {
-            d = item->sign * d;
         }
         item->valuedouble = d;
         item->valueint = n;
@@ -190,7 +188,14 @@ static char *print_double(cJSON *item)
     str = (char*) cJSON_malloc(64); /* This is a nice tradeoff. */
     if (str)
     {
-        sprintf(str, "%.15f", d);
+        if (item->sign == -1)
+        {
+            sprintf(str, "-%.15f", d); 
+        }
+        else
+        {
+            sprintf(str, "%.15f", d);
+        }
     }
     return str;
 }
@@ -209,11 +214,7 @@ static char *print_int(cJSON *item)
             }
             else
             {
-#if LLONG_MAX==LONG_MAX
                 sprintf(str, "%ld", (int64)item->valueint);
-#else
-                sprintf(str, "%lld", (int64)item->valueint);
-#endif
             }
         }
         else
@@ -224,11 +225,7 @@ static char *print_int(cJSON *item)
             }
             else
             {
-#if LLONG_MAX==LONG_MAX
-                sprintf(str, "%lu", (uint64)item->valueint);
-#else
-                sprintf(str, "%llu", (uint64)item->valueint);
-#endif
+                sprintf(str, "%lu", item->valueint);
             }
         }
     }

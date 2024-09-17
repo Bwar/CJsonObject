@@ -72,6 +72,7 @@ public:     // method of ordinary json object
     CJsonObject& operator[](const std::string& strKey);
     std::string operator()(const std::string& strKey) const;
     bool KeyExist(const std::string& strKey) const;
+    int ValueType(const std::string& strKey) const;
     bool Get(const std::string& strKey, CJsonObject& oJsonObject) const;
     bool Get(const std::string& strKey, std::string& strValue) const;
     bool Get(const std::string& strKey, int32& iValue) const;
@@ -81,7 +82,6 @@ public:     // method of ordinary json object
     bool Get(const std::string& strKey, bool& bValue) const;
     bool Get(const std::string& strKey, float& fValue) const;
     bool Get(const std::string& strKey, double& dValue) const;
-    int GetValueType(const std::string& strKey) const;
     bool IsNull(const std::string& strKey) const;
     bool Add(const std::string& strKey, const CJsonObject& oJsonObject);
 #if __cplusplus < 201101L
@@ -142,6 +142,7 @@ public:     // method of json array
     int GetArraySize() const;
     CJsonObject& operator[](unsigned int uiWhich);
     std::string operator()(unsigned int uiWhich) const;
+    int ValueType(int iWhich) const;
     bool Get(int iWhich, CJsonObject& oJsonObject) const;
     bool Get(int iWhich, std::string& strValue) const;
     bool Get(int iWhich, int32& iValue) const;
@@ -151,7 +152,6 @@ public:     // method of json array
     bool Get(int iWhich, bool& bValue) const;
     bool Get(int iWhich, float& fValue) const;
     bool Get(int iWhich, double& dValue) const;
-    int GetValueType(int iWhich) const;
     bool IsNull(int iWhich) const;
     bool Add(const CJsonObject& oJsonObject);
 #if __cplusplus < 201101L
@@ -199,9 +199,6 @@ public:     // method of json array
     bool Replace(int iWhich, float fValue);
     bool Replace(int iWhich, double dValue);
     bool ReplaceWithNull(int iWhich);      // replace with a null value
-//!< Hao Lion added Customize the memory management interface
-public:  
-    static void CJsonObject_InitHooks(void *(*malloc_fn)(size_t sz), void (*free_fn)(void *ptr));
 
 private:
     CJsonObject(cJSON* pJsonData);
@@ -218,10 +215,10 @@ private:
     std::map<std::string, CJsonObject*> m_mapJsonObjectRef;
     std::map<std::string, CJsonObject*>::iterator m_object_iter;
 #else
-    std::unordered_map<unsigned int, CJsonObject*> m_mapJsonArrayRef;
-    std::unordered_map<std::string, CJsonObject*>::iterator m_object_iter;
-    std::unordered_map<std::string, CJsonObject*> m_mapJsonObjectRef;
-    std::unordered_map<unsigned int, CJsonObject*>::iterator m_array_iter;
+    mutable std::unordered_map<unsigned int, CJsonObject*> m_mapJsonArrayRef;
+    mutable std::unordered_map<std::string, CJsonObject*>::iterator m_object_iter;
+    mutable std::unordered_map<std::string, CJsonObject*> m_mapJsonObjectRef;
+    mutable std::unordered_map<unsigned int, CJsonObject*>::iterator m_array_iter;
 #endif
 };
 
