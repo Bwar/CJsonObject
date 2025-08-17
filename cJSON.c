@@ -173,6 +173,10 @@ static const char *parse_number(cJSON *item, const char *num)
         {
             d = item->sign * base * pow(10.0, (scale + subscale * signsubscale)); /* number = +/- number.fraction * 10^+/- exponent */
         }
+        else
+        {
+            d *= item->sign;
+        }
         item->valuedouble = d;
         item->valueint = n;
         item->type = cJSON_Double;
@@ -188,14 +192,7 @@ static char *print_double(cJSON *item)
     str = (char*) cJSON_malloc(64); /* This is a nice tradeoff. */
     if (str)
     {
-        if (item->sign == -1)
-        {
-            sprintf(str, "-%.15f", d); 
-        }
-        else
-        {
-            sprintf(str, "%.15f", d);
-        }
+        sprintf(str, "%.15f", d);
     }
     return str;
 }

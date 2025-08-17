@@ -4,6 +4,19 @@
 #include <sstream>
 #include "../CJsonObject.hpp"
 
+void error_test()
+{
+    neb::CJsonObject item;
+    double data = 0.0;
+    item.Add("neg", -316.2);
+    item.AddEmptySubArray("xxx");
+    item["xxx"].Add(3.141592653589793);
+    item["xxx"].Add(-3.141592653589793);
+    printf("%s\n", item.ToString().c_str());
+    item["xxx"].Get(1, data);
+    printf("data = %lf, %s    %s\n", data, item["xxx"](1).c_str(), item("neg").c_str());
+}
+
 //int main()
 int main(int argc, char* argv[])
 {
@@ -126,5 +139,8 @@ int main(int argc, char* argv[])
      //oJson.Add("json_move", std::move(oLongLong)); // C++11
      oJson.AddWithMove("json_move", oLongLong);  
      std::cout << oJson.ToString() << std::endl;
+ 
+     error_test();
+     return 0;
 }
 
